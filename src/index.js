@@ -145,8 +145,8 @@ export default {
     for (const chunk of splitTelegram(htmlOut)) {
       await tgCall("sendMessage", env.BOT_TOKEN, {
         chat_id: chatId,
-        //text: chunk,
-        text: chunk + "\n\n<i>" + VERSION + "</i>",
+        text: chunk,
+        //text: chunk + "\n\n<i>" + VERSION + "</i>",
         parse_mode: "HTML",
         disable_web_page_preview: true,
       });
