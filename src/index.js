@@ -22,14 +22,14 @@ function mdToTelegramHtml(markdownText) {
   // === 3. headings → bold line + line break ===
   html = html.replace(
     /<h[1-6][^>]*>(.*?)<\/h[1-6]>/gi,
-    "<b>$1</b><br/>"
+    "<b>$1</b>"
   );
 
   // === 4. horizontal rules <hr> → separator ===
-  html = html.replace(/<hr\s*\/?>/gi, "<br/>— — —<br/>");
+  html = html.replace(/<hr\s*\/?>/gi, "\n— — —\n");
 
   // === 5. paragraphs → line breaks ===
-  html = html.replace(/<\/p>\s*<p>/gi, "<br/><br/>");
+  html = html.replace(/<\/p>\s*<p>/gi, "\n\n");
   html = html.replace(/<p>/gi, "");
   html = html.replace(/<\/p>/gi, "");
 
@@ -40,7 +40,7 @@ function mdToTelegramHtml(markdownText) {
   html = html.replace(/<\/?(ul|ol)[^>]*>/gi, "");
 
   // === 7. collapse too many breaks ===
-  html = html.replace(/(<br\s*\/?>\s*){3,}/gi, "<br/><br/>");
+  html = html.replace(/(<br\s*\/?>\s*){3,}/gi, "\n\n");
 
   html = html.replace(/<br\s*\/?>/gi, "\n");
 
@@ -92,7 +92,7 @@ function preProcessMd(input) {
       outLines.push(widths.map(w => "-".repeat(w)).join("-+-"));
       for (let i = 1; i < rows.length; i++) outLines.push(toLine(rows[i]));
 
-      return "```text\n" + outLines.join("\n") + "\n```";
+      return "```\ntext\n" + outLines.join("\n") + "\n```\n";
     }
   );
 
