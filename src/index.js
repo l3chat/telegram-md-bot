@@ -48,7 +48,7 @@ function mdToTelegramHtml(markdownText) {
   html = html.replace(/\n{3,}/g, "\n\n");
   
   // no blank lines between bullet items
-  html = html.replace(/\n\s*\n(?=• )/g, "\n");
+  html = html.replace(/\n\s*\n(?=• )/g, "\n(---)");
 
   return html.trim();
 }
