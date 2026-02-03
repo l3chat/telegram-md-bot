@@ -34,7 +34,7 @@ function mdToTelegramHtml(markdownText) {
   html = html.replace(/<\/p>/gi, "");
 
   // === 6. lists → bullets ===
-  html = html.replace(/<\/li>\s*<li>/gi, "\n• ");
+  html = html.replace(/<\/li>\s*<li>/gim, "\n• ");
   html = html.replace(/<li>/gi, "• ");
   html = html.replace(/<\/li>/gi, "");
   html = html.replace(/<\/?(ul|ol)[^>]*>/gi, "");
