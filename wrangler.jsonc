@@ -1,0 +1,6 @@
+{
+  "name": "tg-md-bot",
+  "main": "src/index.js",
+  "compatibility_date": "2026-02-03",
+  "compatibility_flags": ["nodejs_compat"]
+}
