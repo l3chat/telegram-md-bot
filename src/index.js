@@ -42,6 +42,8 @@ function mdToTelegramHtml(markdownText) {
   // === 7. collapse too many breaks ===
   html = html.replace(/(<br\s*\/?>\s*){3,}/gi, "<br/><br/>");
 
+  html = html.replace(/<br\s*\/?>/gi, "\n");
+
   return html.trim();
 }
 
