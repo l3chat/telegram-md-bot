@@ -9,28 +9,36 @@ const md = new MarkdownIt({
 function mdToTelegramHtml(markdownText) {
   let html = md.render(markdownText);
 
-  // strong/em -> b/i
+  // === 1. strong / em / del ===
   html = html.replaceAll("<strong>", "<b>").replaceAll("</strong>", "</b>");
   html = html.replaceAll("<em>", "<i>").replaceAll("</em>", "</i>");
+  html = html.replaceAll("<del>", "<s>").replaceAll("</del>", "</s>");
 
-  // normalize fenced code blocks
-  html = html.replace(/<pre><code[^>]*>/gi, "<pre><code>");
+  // === 2. code blocks: <pre><code>...</code></pre> → <pre>...</pre> ===
+  html = html.replace(/<pre><code[^>]*>/gi, "<pre>");
+  html = html.replace(/<\/code><\/pre>/gi, "</pre>");
 
-  // paragraphs -> breaks
+  // === 3. headings → bold line + line break ===
+  html = html.replace(
+    /<h[1-6][^>]*>(.*?)<\/h[1-6]>/gi,
+    "<b>$1</b><br/>"
+  );
+
+  // === 4. horizontal rules <hr> → separator ===
+  html = html.replace(/<hr\s*\/?>/gi, "<br/>— — —<br/>");
+
+  // === 5. paragraphs → line breaks ===
   html = html.replace(/<\/p>\s*<p>/gi, "<br/><br/>");
   html = html.replace(/<p>/gi, "");
   html = html.replace(/<\/p>/gi, "");
 
-  // headings -> bold line
-  html = html.replace(/<h[1-6][^>]*>(.*?)<\/h[1-6]>/gi, "<b>$1</b><br/>");
-
-  // lists -> bullets (ul/ol/li unreliable in Telegram)
+  // === 6. lists → bullets ===
   html = html.replace(/<\/li>\s*<li>/gi, "<br/>• ");
   html = html.replace(/<li>/gi, "• ");
   html = html.replace(/<\/li>/gi, "");
   html = html.replace(/<\/?(ul|ol)[^>]*>/gi, "");
 
-  // cleanup too many breaks
+  // === 7. collapse too many breaks ===
   html = html.replace(/(<br\s*\/?>\s*){3,}/gi, "<br/><br/>");
 
   return html.trim();
