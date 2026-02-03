@@ -34,7 +34,7 @@ function mdToTelegramHtml(markdownText) {
   html = html.replace(/<\/p>/gi, "");
 
   // === 6. lists → bullets ===
-  html = html.replace(/<\/li>\s*<li>/gim, "\n• ");
+  html = html.replace(/<\/li>\s*<li>/gi, "\n• ");
   html = html.replace(/<li>/gi, "• ");
   html = html.replace(/<\/li>/gi, "");
   html = html.replace(/<\/?(ul|ol)[^>]*>/gi, "");
@@ -43,6 +43,12 @@ function mdToTelegramHtml(markdownText) {
   html = html.replace(/(<br\s*\/?>\s*){3,}/gi, "\n\n");
 
   html = html.replace(/<br\s*\/?>/gi, "\n");
+
+  // collapse too many newlines (incl. list artifacts)
+  html = html.replace(/\n{3,}/g, "\n\n");
+  
+  // no blank lines between bullet items
+  html = html.replace(/\n\s*\n(?=• )/g, "\n");
 
   return html.trim();
 }
