@@ -138,7 +138,7 @@ function preProcessMd(input) {
       for (let i = 1; i < rows.length; i++) outLines.push(toLine(rows[i]));
 
       // Wrap in a code block so Telegram renders monospaced.
-      return "```\ntext\n" + outLines.join("\n") + "\n```\n";
+      return "```\n" + outLines.join("\n") + "\n```\n";
     }
   );
 
