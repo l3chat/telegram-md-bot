@@ -168,6 +168,13 @@ function splitTelegram(text, max = 3500) {
   return parts;
 }
 
+function escapeHtml(text) {
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
 export default {
   async fetch(request, env) {
     // For quick health-check in browser
@@ -202,11 +209,22 @@ export default {
     for (const chunk of splitTelegram(htmlOut)) {
       await tgCall("sendMessage", env.BOT_TOKEN, {
         chat_id: chatId,
-        text: chunk,
-        //text: chunk + "\n\n<i>" + VERSION + "</i>",
+        text: chunk + "\n\n<i>" + VERSION + "</i>",
         parse_mode: "HTML",
         disable_web_page_preview: true,
       });
+    }
+
+    if (env.DEBUG_ECHO === "1") {
+      const debugText = "<pre>" + escapeHtml(htmlOut) + "</pre>";
+      for (const chunk of splitTelegram(debugText)) {
+        await tgCall("sendMessage", env.BOT_TOKEN, {
+          chat_id: chatId,
+          text: chunk,
+          parse_mode: "HTML",
+          disable_web_page_preview: true,
+        });
+      }
     }
 
     return new Response("OK");
