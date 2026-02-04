@@ -216,6 +216,27 @@ export default {
     }
 
     if (env.DEBUG_ECHO === "1") {
+      const rawText = update.message?.text ?? "";
+      const rawEntities = update.message?.entities ?? [];
+      const rawPayload =
+        "<pre>" +
+        escapeHtml(
+          JSON.stringify(
+            { text: rawText, entities: rawEntities },
+            null,
+            2
+          )
+        ) +
+        "</pre>";
+      for (const chunk of splitTelegram(rawPayload)) {
+        await tgCall("sendMessage", env.BOT_TOKEN, {
+          chat_id: chatId,
+          text: chunk,
+          parse_mode: "HTML",
+          disable_web_page_preview: true,
+        });
+      }
+
       const debugText = "<pre>" + escapeHtml(htmlOut) + "</pre>";
       for (const chunk of splitTelegram(debugText)) {
         await tgCall("sendMessage", env.BOT_TOKEN, {
