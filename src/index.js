@@ -1,5 +1,4 @@
 import MarkdownIt from "markdown-it";
-const VERSION = "v2-preprocess-test-1";
 
 // Markdown renderer configured for Telegram-safe output.
 // - html: false prevents raw HTML injection from user input.
@@ -146,6 +145,69 @@ function preProcessMd(input) {
   return t;
 }
 
+function entityToMarkers(entity) {
+  switch (entity.type) {
+    case "bold":
+      return { open: "**", close: "**" };
+    case "italic":
+      return { open: "*", close: "*" };
+    case "strikethrough":
+      return { open: "~~", close: "~~" };
+    case "code":
+      return { open: "`", close: "`" };
+    case "pre":
+      return { open: "```\n", close: "\n```" };
+    default:
+      return null;
+  }
+}
+
+function applyEntitiesToMarkdown(text, entities) {
+  if (!entities || entities.length === 0) return text;
+
+  const opens = new Map();
+  const closes = new Map();
+
+  for (const entity of entities) {
+    const markers = entityToMarkers(entity);
+    if (!markers) continue;
+
+    const start = entity.offset;
+    const end = entity.offset + entity.length;
+    if (!opens.has(start)) opens.set(start, []);
+    if (!closes.has(end)) closes.set(end, []);
+
+    opens.get(start).push({ ...markers, length: entity.length });
+    closes.get(end).push({ ...markers, length: entity.length });
+  }
+
+  for (const list of opens.values()) {
+    list.sort((a, b) => b.length - a.length);
+  }
+  for (const list of closes.values()) {
+    list.sort((a, b) => a.length - b.length);
+  }
+
+  const positions = new Set([...opens.keys(), ...closes.keys()]);
+  const ordered = Array.from(positions).sort((a, b) => a - b);
+
+  let out = "";
+  let pos = 0;
+  for (const p of ordered) {
+    if (p > pos) out += text.slice(pos, p);
+    if (closes.has(p)) {
+      for (const m of closes.get(p)) out += m.close;
+    }
+    if (opens.has(p)) {
+      for (const m of opens.get(p)) out += m.open;
+    }
+    pos = p;
+  }
+
+  if (pos < text.length) out += text.slice(pos);
+  return out;
+}
+
 // Make a Telegram Bot API call.
 // Throws if Telegram returns ok: false, so upstream can log/fail.
 async function tgCall(method, token, payload) {
@@ -168,13 +230,6 @@ function splitTelegram(text, max = 3500) {
   return parts;
 }
 
-function escapeHtml(text) {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
 export default {
   async fetch(request, env) {
     // For quick health-check in browser
@@ -195,6 +250,7 @@ export default {
     // Parse Telegram update payload.
     const update = await request.json();
     const text = update.message?.text;
+    const entities = update.message?.entities;
     const chatId = update.message?.chat?.id;
 
     // Ignore non-text updates or malformed payloads.
@@ -202,50 +258,18 @@ export default {
 
     // Preprocess Markdown then convert to Telegram HTML.
     //const htmlOut = mdToTelegramHtml(text);
-    const htmlOut = mdToTelegramHtml(preProcessMd(text));
+    const normalized = applyEntitiesToMarkdown(text, entities);
+    const htmlOut = mdToTelegramHtml(preProcessMd(normalized));
     if (!htmlOut) return new Response("OK");
 
     // Send in chunks to stay under Telegram's message size limit.
     for (const chunk of splitTelegram(htmlOut)) {
       await tgCall("sendMessage", env.BOT_TOKEN, {
         chat_id: chatId,
-        text: chunk + "\n\n<i>" + VERSION + "</i>",
+        text: chunk,
         parse_mode: "HTML",
         disable_web_page_preview: true,
       });
-    }
-
-    if (env.DEBUG_ECHO === "1") {
-      const rawText = update.message?.text ?? "";
-      const rawEntities = update.message?.entities ?? [];
-      const rawPayload =
-        "<pre>" +
-        escapeHtml(
-          JSON.stringify(
-            { text: rawText, entities: rawEntities },
-            null,
-            2
-          )
-        ) +
-        "</pre>";
-      for (const chunk of splitTelegram(rawPayload)) {
-        await tgCall("sendMessage", env.BOT_TOKEN, {
-          chat_id: chatId,
-          text: chunk,
-          parse_mode: "HTML",
-          disable_web_page_preview: true,
-        });
-      }
-
-      const debugText = "<pre>" + escapeHtml(htmlOut) + "</pre>";
-      for (const chunk of splitTelegram(debugText)) {
-        await tgCall("sendMessage", env.BOT_TOKEN, {
-          chat_id: chatId,
-          text: chunk,
-          parse_mode: "HTML",
-          disable_web_page_preview: true,
-        });
-      }
     }
 
     return new Response("OK");
