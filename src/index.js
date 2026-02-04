@@ -84,6 +84,11 @@ function mdToTelegramHtml(markdownText) {
 function preProcessMd(input) {
   let t = input.replace(/\r\n/g, "\n");
 
+  // Telegram style preference: treat __text__ as italics, not bold.
+  // Convert double-underscore emphasis to single-asterisk emphasis
+  // before markdown-it processes it.
+  t = t.replace(/(?<!_)__([^\n]+?)__(?!_)/g, "*$1*");
+
   // Headings: ## Title -> **Title**
   // We keep it simple by converting to bold inline Markdown.
   t = t.replace(/^(#{1,6})\s+(.+)$/gm, (_, hashes, title) => {
@@ -207,3 +212,6 @@ export default {
     return new Response("OK");
   },
 };
+
+// Named exports for unit tests.
+export { mdToTelegramHtml, preProcessMd, splitTelegram };
