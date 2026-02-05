@@ -351,7 +351,7 @@ function markdownToEntities(markdownText) {
         append(content);
         const info =
           typeof token.info === "string" ? token.info.trim().split(/\s+/)[0] : "";
-        const language = info || "plaintext";
+        const language = info || "";
         entities.push({
           type: "pre",
           offset: start,
