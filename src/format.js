@@ -1,5 +1,8 @@
 import MarkdownIt from "markdown-it";
 
+const TELEGRAM_MAX_LEN = 3500;
+const HR_SEPARATOR = "— — —";
+
 // Markdown renderer configured for Telegram-safe output.
 // - html: false prevents raw HTML injection from user input.
 // - linkify: true auto-detects links.
@@ -44,7 +47,7 @@ function mdToTelegramHtml(markdownText) {
 
   // === 4. horizontal rules <hr> → separator ===
   // Use a simple text separator line.
-  html = html.replace(/<hr\s*\/?>/gi, "\n— — —\n");
+  html = html.replace(/<hr\s*\/?>/gi, `\n${HR_SEPARATOR}\n`);
 
   // === 5. paragraphs → line breaks ===
   // Telegram treats line breaks as newlines in plain text.
@@ -96,7 +99,7 @@ function preProcessMd(input) {
 
   // Horizontal rule --- -> separator
   // Render a visible separator line in chat.
-  t = t.replace(/^\s*---\s*$/gm, "— — —");
+  t = t.replace(/^\s*---\s*$/gm, HR_SEPARATOR);
 
   // Bullet lists: lines starting with "-" or "*" -> "• "
   // NOTE: Do not replace list markers here. We want markdown-it to
@@ -210,7 +213,7 @@ function applyEntitiesToMarkdown(text, entities) {
 
 // Split long messages to avoid Telegram length limits.
 // We use a conservative default of 3500 chars.
-function splitTelegram(text, max = 3500) {
+function splitTelegram(text, max = TELEGRAM_MAX_LEN) {
   const parts = [];
   for (let i = 0; i < text.length; i += max) parts.push(text.slice(i, i + max));
   return parts;
@@ -352,7 +355,7 @@ function markdownToEntities(markdownText) {
       }
       case "hr":
         appendBlockGap();
-        append("— — —");
+        append(HR_SEPARATOR);
         appendBlockGap();
         break;
       default:
@@ -384,7 +387,7 @@ function sliceEntitiesForRange(entities, start, end) {
 // Split text and entities while respecting entity boundaries when possible.
 // If an entity spans the max boundary, we prefer splitting before it.
 // If the entity itself is larger than max, we split inside it and clip.
-function splitTelegramWithEntities(text, entities, max = 3500) {
+function splitTelegramWithEntities(text, entities, max = TELEGRAM_MAX_LEN) {
   const parts = [];
   let pos = 0;
 
