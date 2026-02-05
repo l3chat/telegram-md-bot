@@ -30,18 +30,13 @@ test("splitTelegramWithEntities avoids splitting inside entities", () => {
   });
 });
 
-test("tables are converted into monospaced code blocks", () => {
+test("tables are converted into plain text without code entities", () => {
   const input = "| A | B |\n|---|---|\n| 1 | 2 |";
   const { text, entities } = markdownToEntities(input);
 
   assert.ok(text.includes("A | B"));
   assert.ok(text.includes("1 | 2"));
-  assert.equal(entities.length, 1);
-  assert.deepEqual(entities[0], {
-    type: "pre",
-    offset: 0,
-    length: text.length - 2,
-  });
+  assert.equal(entities.length, 0);
 });
 
 test("manual test content matches expected entities output", () => {

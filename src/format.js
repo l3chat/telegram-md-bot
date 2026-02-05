@@ -1,7 +1,7 @@
 import MarkdownIt from "markdown-it";
 
 const TELEGRAM_MAX_LEN = 3500;
-const HR_SEPARATOR = "— — —";
+const HR_SEPARATOR = "─────";
 
 // Markdown renderer configured for Telegram-safe output.
 // - html: false prevents raw HTML injection from user input.
@@ -140,8 +140,8 @@ function preProcessMd(input) {
       outLines.push(widths.map((w) => "-".repeat(w)).join("-+-"));
       for (let i = 1; i < rows.length; i++) outLines.push(toLine(rows[i]));
 
-      // Wrap in a code block so Telegram renders monospaced.
-      return "```\n" + outLines.join("\n") + "\n```\n";
+      // Keep as plain text to avoid code block UI (e.g., copy buttons).
+      return `\n${outLines.join("\n")}\n`;
     }
   );
 
@@ -349,7 +349,15 @@ function markdownToEntities(markdownText) {
         const start = text.length;
         const content = token.content.replace(/\n$/, "");
         append(content);
-        entities.push({ type: "pre", offset: start, length: content.length });
+        const info =
+          typeof token.info === "string" ? token.info.trim().split(/\s+/)[0] : "";
+        const extra = info ? { language: info } : null;
+        entities.push({
+          type: "pre",
+          offset: start,
+          length: content.length,
+          ...(extra || {}),
+        });
         appendBlockGap();
         break;
       }

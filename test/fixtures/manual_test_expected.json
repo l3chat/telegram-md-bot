@@ -1,5 +1,5 @@
 {
-  "text": "Telegram Markdown Test Content\n\nUse this file to copy/paste into Telegram and verify rendering.\n— — —\nHeadings\n\nHeading 1\nHeading 2\nHeading 3\n— — —\nEmphasis\n\nNormal text with bold, italic, and strikethrough.\n\nMixed bold and italic inside the same phrase.\n\nDouble-underscore italic should be treated as italics here.\n— — —\nLinks\n\nInline link: Telegram\n\nAutolink: https://example.com\n— — —\nLists\n\n• Simple list item\n• Bold inside list\n• Italic inside list\n• Mixed bold and italic inside list\n— — —\nCode\nInline code: const value = 42;\n\nFenced code block:\n\nfunction add(a, b) {\n  return a + b;\n}\n\n— — —\nTables\n\nName  | Status  | Count\n------+---------+------\nAlpha | Done    | 3    \nBeta  | Pending | 12   \nGamma | Blocked | 0    \n\n— — —\nHorizontal Rule\n— — —— — —\nParagraphs and Line Breaks\n\nThis is a paragraph with\na soft line break to test newlines.\n\nThis is a second paragraph after a blank line.\n— — —\nMixed Content\n\nDaily Update\n\n• Goal: Ship the entities-only pipeline\n• Status: In progress\n• Risk: Reduced with tests\nSee details at https://example.org/docs.\n\nStatus: OK\nLast run: 2026-02-05\n\n",
+  "text": "Telegram Markdown Test Content\n\nUse this file to copy/paste into Telegram and verify rendering.\n─────\nHeadings\n\nHeading 1\nHeading 2\nHeading 3\n─────\nEmphasis\n\nNormal text with bold, italic, and strikethrough.\n\nMixed bold and italic inside the same phrase.\n\nDouble-underscore italic should be treated as italics here.\n─────\nLinks\n\nInline link: Telegram\n\nAutolink: https://example.com\n─────\nLists\n\n• Simple list item\n• Bold inside list\n• Italic inside list\n• Mixed bold and italic inside list\n─────\nCode\nInline code: const value = 42;\n\nFenced code block:\n\nfunction add(a, b) {\n  return a + b;\n}\n\n─────\nTables\n\nName  | Status  | Count\n------+---------+------\nAlpha | Done    | 3\nBeta  | Pending | 12\nGamma | Blocked | 0\n─────\nHorizontal Rule\n──────────\nParagraphs and Line Breaks\n\nThis is a paragraph with\na soft line break to test newlines.\n\nThis is a second paragraph after a blank line.\n─────\nMixed Content\n\nDaily Update\n\n• Goal: Ship the entities-only pipeline\n• Status: In progress\n• Risk: Reduced with tests\nSee details at https://example.org/docs.\n\nStatus: OK\nLast run: 2026-02-05\n\n",
   "entities": [
     {
       "type": "bold",
@@ -124,54 +124,49 @@
       "length": 6
     },
     {
-      "type": "pre",
-      "offset": 607,
-      "length": 119
-    },
-    {
       "type": "bold",
-      "offset": 734,
+      "offset": 722,
       "length": 15
     },
     {
       "type": "bold",
-      "offset": 761,
+      "offset": 749,
       "length": 26
     },
     {
       "type": "bold",
-      "offset": 904,
+      "offset": 892,
       "length": 13
     },
     {
       "type": "bold",
-      "offset": 919,
+      "offset": 907,
       "length": 12
     },
     {
       "type": "bold",
-      "offset": 935,
+      "offset": 923,
       "length": 5
     },
     {
       "type": "italic",
-      "offset": 975,
+      "offset": 963,
       "length": 7
     },
     {
       "type": "strikethrough",
-      "offset": 997,
+      "offset": 985,
       "length": 5
     },
     {
       "type": "text_link",
-      "offset": 1037,
+      "offset": 1025,
       "length": 24,
       "url": "https://example.org/docs"
     },
     {
       "type": "pre",
-      "offset": 1064,
+      "offset": 1052,
       "length": 31
     }
   ]

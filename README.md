@@ -68,7 +68,7 @@ Text + Entities
 Telegram Bot API
 ```
 
-The bot parses incoming Markdown messages and converts them into structured formatting entities before sending them back to Telegram.
+The bot parses incoming Markdown messages and converts them into structured formatting entities before sending them back to Telegram. Messages are sent with `text` + `entities` (no `parse_mode`).
 
 ---
 
@@ -264,7 +264,11 @@ The bot returns the same message with clean Telegram formatting and message enti
 
 ```text
 src/
- └── index.js      # Main worker logic
+ ├── index.js      # Main worker logic
+ └── format.js     # Markdown -> entities formatting pipeline
+MANUAL_TEST_CONTENT.md  # Copy/paste sample for Telegram manual testing
+test/fixtures/
+ └── manual_test_expected.json  # Expected output for manual test fixture
 wrangler.jsonc     # Cloudflare configuration
 package.json       # Dependencies
 ```
@@ -281,6 +285,28 @@ npx wrangler dev
 
 Then set webhook to the local tunnel.
 
+Manual test content (copy/paste into Telegram):
+
+- `MANUAL_TEST_CONTENT.md`
+
+Fixture-based test:
+
+- `test/fixtures/manual_test_expected.json` is generated from `MANUAL_TEST_CONTENT.md`
+- `npm test` verifies the current formatter output matches that fixture
+
+---
+
+## 📚 Telegram Entities Docs
+
+Official Telegram references for entities and formatting:
+
+```text
+https://core.telegram.org/bots/api#messageentity
+https://core.telegram.org/bots/api#sendmessage
+https://core.telegram.org/bots/api#formatting-options
+https://core.telegram.org/api/entities
+```
+
 ---
 
 ## 🛡 Security
@@ -289,6 +315,7 @@ Then set webhook to the local tunnel.
 - Tokens are stored as secrets
 - No credentials in repository
 - HTTPS-only communication
+- Secret verification is optional if `WEBHOOK_SECRET` is unset
 
 ---
 
