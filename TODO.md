@@ -7,5 +7,5 @@
 7. [x] Fix the table test expectation in `test/index.test.js` to match real `preProcessMd` output.
 8. [x] Decide whether `WEBHOOK_SECRET` is required; make code and docs consistent.
 9. [x] Centralize constants like max message length and separator text.
-10. [ ] Add basic CI for `npm test` and optionally lint/format tooling.
+10. [x] Add basic CI for `npm test` and optionally lint/format tooling.
 11. [x] Separate formatting logic from the Worker handler into a module (e.g., `src/format.js`).
