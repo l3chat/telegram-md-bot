@@ -29,9 +29,11 @@ export default {
     // Verify Telegram webhook secret
     // Telegram will include this header if you configured a webhook secret.
     // We reject requests that don't match to prevent spoofed updates.
-    const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
-    if (!secret || secret !== env.WEBHOOK_SECRET) {
-      return new Response("Forbidden", { status: 403 });
+    if (env.WEBHOOK_SECRET) {
+      const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
+      if (!secret || secret !== env.WEBHOOK_SECRET) {
+        return new Response("Forbidden", { status: 403 });
+      }
     }
 
     // Parse Telegram update payload.
