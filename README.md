@@ -16,6 +16,7 @@ This approach avoids HTML parsing problems and guarantees consistent formatting 
 
 - Converts Markdown to Telegram-native formatting
 - Uses message entities instead of HTML
+- Sends messages with `entities` (no `parse_mode`)
 
 ## 🤖 Demo Bot
 
@@ -240,7 +241,7 @@ The bot returns the same message with clean Telegram formatting and message enti
 | Code blocks | Yes | Fenced blocks |
 | Headings | Yes | `#`, `##`, `###` |
 | Bullet lists | Yes | `- item` |
-| Links | Yes | `[text](url)` |
+| Links | Yes | `[text](url)` and auto-linked URLs |
 | Tables | Partial | Rendered as monospaced blocks |
 
 ---
@@ -249,13 +250,13 @@ The bot returns the same message with clean Telegram formatting and message enti
 
 | Category | Supported | Not Supported | Notes |
 | --- | --- | --- | --- |
-| Text emphasis | Bold, italic | Underline, strikethrough | Telegram entities are used |
+| Text emphasis | Bold, italic, strikethrough | Underline | Telegram entities are used |
 | Code | Inline code, fenced blocks | Language-specific highlighting | Rendered as code entities |
 | Headings | `#`, `##`, `###` | Deep heading levels | Rendered as bold text |
 | Lists | Bulleted lists | Nested lists | Flat lists only |
-| Links | Standard Markdown links | Autolink without text | Must be `[text](url)` |
+| Links | Standard links, autolinks | Reference-style links | Basic Markdown link support |
 | Tables | Basic tables | Alignment, complex tables | Rendered as monospaced blocks |
-| Quotes | Basic `>` quotes | Multi-level quotes | Minimal formatting |
+| Quotes | Basic `>` quotes | Multi-level quotes | Rendered as plain text |
 
 ---
 

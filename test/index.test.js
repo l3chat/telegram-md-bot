@@ -1,33 +1,43 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mdToTelegramHtml, preProcessMd, splitTelegram } from "../src/index.js";
+import {
+  markdownToEntities,
+  splitTelegramWithEntities,
+} from "../src/format.js";
 
 test("bold and italics formatting survive inside lists", () => {
   const input = "- **bold**\n- __bold__";
-  const output = mdToTelegramHtml(preProcessMd(input));
+  const { text, entities } = markdownToEntities(input);
 
-  const lines = output.split("\n");
-  assert.equal(lines.length, 2);
-  assert.equal(lines[0], "• <b>bold</b>");
-  assert.equal(lines[1], "• <i>bold</i>");
+  assert.equal(text, "• bold\n• bold\n");
+  assert.equal(entities.length, 2);
+  assert.deepEqual(entities[0], { type: "bold", offset: 2, length: 4 });
+  assert.deepEqual(entities[1], { type: "italic", offset: 9, length: 4 });
 });
 
-test("splitTelegram splits long strings conservatively", () => {
-  const input = "a".repeat(7001);
-  const parts = splitTelegram(input, 3500);
+test("splitTelegramWithEntities avoids splitting inside entities", () => {
+  const text = "hello world";
+  const entities = [{ type: "bold", offset: 6, length: 5 }];
+  const parts = splitTelegramWithEntities(text, entities, 7);
 
-  assert.equal(parts.length, 3);
-  assert.equal(parts[0].length, 3500);
-  assert.equal(parts[1].length, 3500);
-  assert.equal(parts[2].length, 1);
+  assert.equal(parts.length, 2);
+  assert.deepEqual(parts[0], { text: "hello ", entities: [] });
+  assert.deepEqual(parts[1], {
+    text: "world",
+    entities: [{ type: "bold", offset: 0, length: 5 }],
+  });
 });
 
 test("tables are converted into monospaced code blocks", () => {
   const input = "| A | B |\n|---|---|\n| 1 | 2 |";
-  const output = preProcessMd(input);
+  const { text, entities } = markdownToEntities(input);
 
-  assert.ok(output.startsWith("```\ntext\n"));
-  assert.ok(output.trimEnd().endsWith("```"));
-  assert.ok(output.includes("A | B"));
-  assert.ok(output.includes("1 | 2"));
+  assert.ok(text.includes("A | B"));
+  assert.ok(text.includes("1 | 2"));
+  assert.equal(entities.length, 1);
+  assert.deepEqual(entities[0], {
+    type: "pre",
+    offset: 0,
+    length: text.length - 2,
+  });
 });
