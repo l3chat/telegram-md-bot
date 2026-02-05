@@ -234,6 +234,7 @@ function markdownToEntities(markdownText) {
   let text = "";
   const entities = [];
   const stack = [];
+  let listItemDepth = 0;
 
   const append = (chunk) => {
     text += chunk;
@@ -314,7 +315,7 @@ function markdownToEntities(markdownText) {
       case "paragraph_open":
         break;
       case "paragraph_close":
-        appendBlockGap();
+        if (listItemDepth === 0) appendBlockGap();
         break;
       case "heading_open":
         openEntity("bold");
@@ -331,11 +332,13 @@ function markdownToEntities(markdownText) {
         appendBlockGap();
         break;
       case "list_item_open":
+        listItemDepth += 1;
         ensureLineStart();
         append("• ");
         break;
       case "list_item_close":
         append("\n");
+        listItemDepth = Math.max(0, listItemDepth - 1);
         break;
       case "fence":
       case "code_block": {
