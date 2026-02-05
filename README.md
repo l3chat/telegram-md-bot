@@ -17,6 +17,10 @@ This approach avoids HTML parsing problems and guarantees consistent formatting 
 - Converts Markdown to Telegram-native formatting
 - Uses message entities instead of HTML
 
+## 🤖 Demo Bot
+
+Try the live bot on Telegram: **@tgMdFormatter_bot**
+
 Supports:
 
 - **Bold**, *italic*
@@ -53,7 +57,15 @@ For production bots, entities mode is the recommended approach.
 
 Processing pipeline:
 
-Markdown ↓ Parser ↓ Text + Entities ↓ Telegram Bot API
+```
+Markdown 
+   ↓ 
+Parser 
+   ↓ 
+Text + Entities 
+   ↓ 
+Telegram Bot API
+```
 
 The bot parses incoming Markdown messages and converts them into structured formatting entities before sending them back to Telegram.
 
@@ -61,12 +73,23 @@ The bot parses incoming Markdown messages and converts them into structured form
 
 ## 🚀 Getting Started
 
+### Quick Start
+
+```bash
+git clone https://github.com/<yourname>/telegram-md-bot.git
+cd telegram-md-bot
+npm install
+```
+
+Then deploy to Cloudflare Workers, set the required secrets, and configure the Telegram webhook.
+
 ### 1. Create a Telegram Bot
 
 Open Telegram and contact **@BotFather**.
 
 ```text
 /start
+
 /newbot
 ```
 
@@ -77,7 +100,7 @@ Follow the instructions and save your `BOT_TOKEN`.
 ### 2. Fork or Clone Repository
 
 ```bash
-git clone https://github.com/yourname/telegram-md-bot.git
+git clone https://github.com/<yourname>/telegram-md-bot.git
 cd telegram-md-bot
 ```
 
@@ -112,6 +135,19 @@ Set both as Secrets.
 
 ---
 
+## 🔐 Environment Variables
+
+Required:
+
+- `BOT_TOKEN` — Telegram bot token
+- `WEBHOOK_SECRET` — Secret token for webhook verification
+
+Optional:
+
+- `WEBHOOK_SECRET` can be left unset if you do not use secret verification.
+
+---
+
 ### 5. Configure Telegram Webhook
 
 After deployment, set the webhook:
@@ -132,6 +168,11 @@ Content-Type: application/json
 }
 ```
 
+Webhook vs polling:
+
+- This bot expects **webhook** updates via Cloudflare Workers.
+- Polling is not supported in this deployment model.
+
 ---
 
 ### 6. Verify Webhook
@@ -141,6 +182,16 @@ https://api.telegram.org/bot<BOT_TOKEN>/getWebhookInfo
 ```
 
 The returned `url` must match your Worker URL.
+
+---
+
+## ✅ Deployment Checklist
+
+- Worker deployed successfully
+- `BOT_TOKEN` configured
+- `WEBHOOK_SECRET` configured (if used)
+- Webhook set to your Worker URL
+- Webhook verification passes
 
 ---
 
@@ -169,8 +220,42 @@ Input:
 - Write docs
 - Prepare release
 
-`npm run build`
 ```
+
+---
+
+## 🧾 Example Output
+
+The bot returns the same message with clean Telegram formatting and message entities applied. For example, headings, bold text, code, and lists will render exactly as expected in all clients.
+
+---
+
+## ✅ Supported Markdown
+
+| Feature | Supported | Notes |
+| --- | --- | --- |
+| Bold | Yes | `**bold**` |
+| Italic | Yes | `*italic*` |
+| Inline code | Yes | `` `code` `` |
+| Code blocks | Yes | Fenced blocks |
+| Headings | Yes | `#`, `##`, `###` |
+| Bullet lists | Yes | `- item` |
+| Links | Yes | `[text](url)` |
+| Tables | Partial | Rendered as monospaced blocks |
+
+---
+
+## 📊 Supported vs Not Supported
+
+| Category | Supported | Not Supported | Notes |
+| --- | --- | --- | --- |
+| Text emphasis | Bold, italic | Underline, strikethrough | Telegram entities are used |
+| Code | Inline code, fenced blocks | Language-specific highlighting | Rendered as code entities |
+| Headings | `#`, `##`, `###` | Deep heading levels | Rendered as bold text |
+| Lists | Bulleted lists | Nested lists | Flat lists only |
+| Links | Standard Markdown links | Autolink without text | Must be `[text](url)` |
+| Tables | Basic tables | Alignment, complex tables | Rendered as monospaced blocks |
+| Quotes | Basic `>` quotes | Multi-level quotes | Minimal formatting |
 
 ---
 
@@ -222,6 +307,34 @@ Bot does not respond:
 Pending updates:
 
 - Reset webhook: `deleteWebhook` → `setWebhook`
+
+---
+
+## 🚫 Limitations
+
+- Telegram has limits on entity counts and message length.
+- Tables are rendered as monospaced text, not native tables.
+- Complex nested Markdown may be simplified.
+
+---
+
+## ❓ FAQ
+
+Why is my bot not responding?
+
+- Check the webhook URL
+- Verify secrets
+- Inspect Cloudflare logs
+
+Why do I get `400` errors?
+
+- Ensure entities mode is used
+- Avoid unsupported markup
+
+Do I need to change bot settings?
+
+- Ensure the bot can read messages in the target chat
+- Disable Privacy Mode if you need group-wide formatting
 
 ---
 
