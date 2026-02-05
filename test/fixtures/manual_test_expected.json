@@ -117,7 +117,7 @@
       "type": "pre",
       "offset": 553,
       "length": 38,
-      "language": ""
+      "language": "plaintext"
     },
     {
       "type": "bold",
@@ -169,7 +169,7 @@
       "type": "pre",
       "offset": 1052,
       "length": 31,
-      "language": ""
+      "language": "plaintext"
     }
   ]
 }
