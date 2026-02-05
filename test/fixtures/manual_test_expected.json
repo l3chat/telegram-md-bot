@@ -1,0 +1,178 @@
+{
+  "text": "Telegram Markdown Test Content\n\nUse this file to copy/paste into Telegram and verify rendering.\n— — —\nHeadings\n\nHeading 1\nHeading 2\nHeading 3\n— — —\nEmphasis\n\nNormal text with bold, italic, and strikethrough.\n\nMixed bold and italic inside the same phrase.\n\nDouble-underscore italic should be treated as italics here.\n— — —\nLinks\n\nInline link: Telegram\n\nAutolink: https://example.com\n— — —\nLists\n\n• Simple list item\n• Bold inside list\n• Italic inside list\n• Mixed bold and italic inside list\n— — —\nCode\nInline code: const value = 42;\n\nFenced code block:\n\nfunction add(a, b) {\n  return a + b;\n}\n\n— — —\nTables\n\nName  | Status  | Count\n------+---------+------\nAlpha | Done    | 3    \nBeta  | Pending | 12   \nGamma | Blocked | 0    \n\n— — —\nHorizontal Rule\n— — —— — —\nParagraphs and Line Breaks\n\nThis is a paragraph with\na soft line break to test newlines.\n\nThis is a second paragraph after a blank line.\n— — —\nMixed Content\n\nDaily Update\n\n• Goal: Ship the entities-only pipeline\n• Status: In progress\n• Risk: Reduced with tests\nSee details at https://example.org/docs.\n\nStatus: OK\nLast run: 2026-02-05\n\n",
+  "entities": [
+    {
+      "type": "bold",
+      "offset": 0,
+      "length": 30
+    },
+    {
+      "type": "bold",
+      "offset": 102,
+      "length": 8
+    },
+    {
+      "type": "bold",
+      "offset": 112,
+      "length": 9
+    },
+    {
+      "type": "bold",
+      "offset": 122,
+      "length": 9
+    },
+    {
+      "type": "bold",
+      "offset": 132,
+      "length": 9
+    },
+    {
+      "type": "bold",
+      "offset": 148,
+      "length": 8
+    },
+    {
+      "type": "bold",
+      "offset": 175,
+      "length": 4
+    },
+    {
+      "type": "italic",
+      "offset": 181,
+      "length": 6
+    },
+    {
+      "type": "strikethrough",
+      "offset": 193,
+      "length": 13
+    },
+    {
+      "type": "italic",
+      "offset": 224,
+      "length": 6
+    },
+    {
+      "type": "bold",
+      "offset": 215,
+      "length": 15
+    },
+    {
+      "type": "italic",
+      "offset": 274,
+      "length": 6
+    },
+    {
+      "type": "bold",
+      "offset": 322,
+      "length": 5
+    },
+    {
+      "type": "text_link",
+      "offset": 342,
+      "length": 8,
+      "url": "https://telegram.org"
+    },
+    {
+      "type": "text_link",
+      "offset": 362,
+      "length": 19,
+      "url": "https://example.com"
+    },
+    {
+      "type": "bold",
+      "offset": 388,
+      "length": 5
+    },
+    {
+      "type": "bold",
+      "offset": 416,
+      "length": 4
+    },
+    {
+      "type": "italic",
+      "offset": 435,
+      "length": 6
+    },
+    {
+      "type": "bold",
+      "offset": 462,
+      "length": 4
+    },
+    {
+      "type": "italic",
+      "offset": 471,
+      "length": 6
+    },
+    {
+      "type": "bold",
+      "offset": 496,
+      "length": 4
+    },
+    {
+      "type": "code",
+      "offset": 514,
+      "length": 17
+    },
+    {
+      "type": "pre",
+      "offset": 553,
+      "length": 38
+    },
+    {
+      "type": "bold",
+      "offset": 599,
+      "length": 6
+    },
+    {
+      "type": "pre",
+      "offset": 607,
+      "length": 119
+    },
+    {
+      "type": "bold",
+      "offset": 734,
+      "length": 15
+    },
+    {
+      "type": "bold",
+      "offset": 761,
+      "length": 26
+    },
+    {
+      "type": "bold",
+      "offset": 904,
+      "length": 13
+    },
+    {
+      "type": "bold",
+      "offset": 919,
+      "length": 12
+    },
+    {
+      "type": "bold",
+      "offset": 935,
+      "length": 5
+    },
+    {
+      "type": "italic",
+      "offset": 975,
+      "length": 7
+    },
+    {
+      "type": "strikethrough",
+      "offset": 997,
+      "length": 5
+    },
+    {
+      "type": "text_link",
+      "offset": 1037,
+      "length": 24,
+      "url": "https://example.org/docs"
+    },
+    {
+      "type": "pre",
+      "offset": 1064,
+      "length": 31
+    }
+  ]
+}

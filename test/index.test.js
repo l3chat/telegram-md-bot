@@ -4,6 +4,8 @@ import {
   markdownToEntities,
   splitTelegramWithEntities,
 } from "../src/format.js";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 test("bold and italics formatting survive inside lists", () => {
   const input = "- **bold**\n- __bold__";
@@ -40,4 +42,13 @@ test("tables are converted into monospaced code blocks", () => {
     offset: 0,
     length: text.length - 2,
   });
+});
+
+test("manual test content matches expected entities output", () => {
+  const md = readFileSync("MANUAL_TEST_CONTENT.md", "utf8");
+  const expectedPath = join("test", "fixtures", "manual_test_expected.json");
+  const expected = JSON.parse(readFileSync(expectedPath, "utf8"));
+
+  const actual = markdownToEntities(md);
+  assert.deepEqual(actual, expected);
 });

@@ -10,3 +10,4 @@
 10. [x] Add basic CI for `npm test` and optionally lint/format tooling.
 11. [x] Separate formatting logic from the Worker handler into a module (e.g., `src/format.js`).
 12. [x] Add a Markdown test content file for Telegram copy/paste (`MANUAL_TEST_CONTENT.md`).
+13. [x] Add fixture-based test for `MANUAL_TEST_CONTENT.md`.
