@@ -12,4 +12,4 @@
 12. [x] Add a Markdown test content file for Telegram copy/paste (`MANUAL_TEST_CONTENT.md`).
 13. [x] Add fixture-based test for `MANUAL_TEST_CONTENT.md`.
 14. [ ] Roadmap: Advanced table rendering.
-15. [ ] Roadmap: Quote blocks.
+15. [x] Roadmap: Quote blocks.

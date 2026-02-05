@@ -1,5 +1,5 @@
 {
-  "text": "Telegram Markdown Test Content\n\nUse this file to copy/paste into Telegram and verify rendering.\n─────\nHeadings\n\nHeading 1\nHeading 2\nHeading 3\n─────\nEmphasis\n\nNormal text with bold, italic, and strikethrough.\n\nMixed bold and italic inside the same phrase.\n\nDouble-underscore italic should be treated as italics here.\n─────\nLinks\n\nInline link: Telegram\n\nAutolink: https://example.com\n─────\nLists\n\n• Simple list item\n• Bold inside list\n• Italic inside list\n• Mixed bold and italic inside list\n─────\nCode\nInline code: const value = 42;\n\nFenced code block:\n\nfunction add(a, b) {\n  return a + b;\n}\n\n─────\nTables\n\nName  | Status  | Count\n------+---------+------\nAlpha | Done    | 3\nBeta  | Pending | 12\nGamma | Blocked | 0\n─────\nHorizontal Rule\n──────────\nParagraphs and Line Breaks\n\nThis is a paragraph with\na soft line break to test newlines.\n\nThis is a second paragraph after a blank line.\n─────\nMixed Content\n\nDaily Update\n\n• Goal: Ship the entities-only pipeline\n• Status: In progress\n• Risk: Reduced with tests\nSee details at https://example.org/docs.\n\nStatus: OK\nLast run: 2026-02-05\n\n",
+  "text": "Telegram Markdown Test Content\n\nUse this file to copy/paste into Telegram and verify rendering.\n─────\nHeadings\n\nHeading 1\nHeading 2\nHeading 3\n─────\nEmphasis\n\nNormal text with bold, italic, and strikethrough.\n\nMixed bold and italic inside the same phrase.\n\nDouble-underscore italic should be treated as italics here.\n─────\nLinks\n\nInline link: Telegram\n\nAutolink: https://example.com\n─────\nQuotes\n\nThis is a quoted line.\nIt should render as a single blockquote.\n─────\nLists\n\n• Simple list item\n• Bold inside list\n• Italic inside list\n• Mixed bold and italic inside list\n─────\nCode\nInline code: const value = 42;\n\nFenced code block:\n\nfunction add(a, b) {\n  return a + b;\n}\n\n─────\nTables\n\nName  | Status  | Count\n------+---------+------\nAlpha | Done    | 3\nBeta  | Pending | 12\nGamma | Blocked | 0\n─────\nHorizontal Rule\n──────────\nParagraphs and Line Breaks\n\nThis is a paragraph with\na soft line break to test newlines.\n\nThis is a second paragraph after a blank line.\n─────\nMixed Content\n\nDaily Update\n\n• Goal: Ship the entities-only pipeline\n• Status: In progress\n• Risk: Reduced with tests\nSee details at https://example.org/docs.\n\nStatus: OK\nLast run: 2026-02-05\n\n",
   "entities": [
     {
       "type": "bold",
@@ -81,93 +81,103 @@
     {
       "type": "bold",
       "offset": 388,
+      "length": 6
+    },
+    {
+      "type": "bold",
+      "offset": 466,
       "length": 5
     },
     {
+      "type": "blockquote",
+      "offset": 396,
+      "length": 77
+    },
+    {
       "type": "bold",
-      "offset": 416,
+      "offset": 494,
       "length": 4
     },
     {
       "type": "italic",
-      "offset": 435,
+      "offset": 513,
       "length": 6
     },
     {
       "type": "bold",
-      "offset": 462,
+      "offset": 540,
       "length": 4
     },
     {
       "type": "italic",
-      "offset": 471,
+      "offset": 549,
       "length": 6
     },
     {
       "type": "bold",
-      "offset": 496,
+      "offset": 574,
       "length": 4
     },
     {
       "type": "code",
-      "offset": 514,
+      "offset": 592,
       "length": 17
     },
     {
       "type": "pre",
-      "offset": 553,
+      "offset": 631,
       "length": 38,
       "language": "plaintext"
     },
     {
       "type": "bold",
-      "offset": 599,
+      "offset": 677,
       "length": 6
     },
     {
       "type": "bold",
-      "offset": 722,
+      "offset": 800,
       "length": 15
     },
     {
       "type": "bold",
-      "offset": 749,
+      "offset": 827,
       "length": 26
     },
     {
       "type": "bold",
-      "offset": 892,
+      "offset": 970,
       "length": 13
     },
     {
       "type": "bold",
-      "offset": 907,
+      "offset": 985,
       "length": 12
     },
     {
       "type": "bold",
-      "offset": 923,
+      "offset": 1001,
       "length": 5
     },
     {
       "type": "italic",
-      "offset": 963,
+      "offset": 1041,
       "length": 7
     },
     {
       "type": "strikethrough",
-      "offset": 985,
+      "offset": 1063,
       "length": 5
     },
     {
       "type": "text_link",
-      "offset": 1025,
+      "offset": 1103,
       "length": 24,
       "url": "https://example.org/docs"
     },
     {
       "type": "pre",
-      "offset": 1052,
+      "offset": 1130,
       "length": 31,
       "language": "plaintext"
     }

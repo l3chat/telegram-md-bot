@@ -29,7 +29,7 @@ Supports:
 - Headings
 - Bullet lists
 - Links
-- Tables (as monospaced blocks)
+- Tables (as plain text blocks)
 
 Additional highlights:
 
@@ -242,7 +242,8 @@ The bot returns the same message with clean Telegram formatting and message enti
 | Headings | Yes | `#`, `##`, `###` |
 | Bullet lists | Yes | `- item` |
 | Links | Yes | `[text](url)` and auto-linked URLs |
-| Tables | Partial | Rendered as monospaced blocks |
+| Tables | Partial | Rendered as plain text blocks |
+| Quotes | Yes | `> quoted text` |
 
 ---
 
@@ -255,8 +256,8 @@ The bot returns the same message with clean Telegram formatting and message enti
 | Headings | `#`, `##`, `###` | Deep heading levels | Rendered as bold text |
 | Lists | Bulleted lists | Nested lists | Flat lists only |
 | Links | Standard links, autolinks | Reference-style links | Basic Markdown link support |
-| Tables | Basic tables | Alignment, complex tables | Rendered as monospaced blocks |
-| Quotes | Basic `>` quotes | Multi-level quotes | Rendered as plain text |
+| Tables | Basic tables | Alignment, complex tables | Rendered as plain text |
+| Quotes | Basic `>` quotes | Nested blockquotes | Rendered via blockquote entities |
 
 ---
 
@@ -341,7 +342,7 @@ Pending updates:
 ## 🚫 Limitations
 
 - Telegram has limits on entity counts and message length.
-- Tables are rendered as monospaced text, not native tables.
+- Tables are rendered as plain text, not native tables.
 - Complex nested Markdown may be simplified.
 
 ---

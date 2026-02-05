@@ -39,6 +39,19 @@ test("tables are converted into plain text without code entities", () => {
   assert.equal(entities.length, 0);
 });
 
+test("blockquotes are emitted as blockquote entities", () => {
+  const input = "> quoted line\n> second line";
+  const { text, entities } = markdownToEntities(input);
+
+  assert.equal(text, "quoted line\nsecond line\n\n");
+  assert.equal(entities.length, 1);
+  assert.deepEqual(entities[0], {
+    type: "blockquote",
+    offset: 0,
+    length: text.length,
+  });
+});
+
 test("manual test content matches expected entities output", () => {
   const md = readFileSync("MANUAL_TEST_CONTENT.md", "utf8");
   const expectedPath = join("test", "fixtures", "manual_test_expected.json");

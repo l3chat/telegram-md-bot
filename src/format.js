@@ -231,6 +231,10 @@ function closeEntity(entities, stack, type, endOffset) {
   }
 }
 
+function hasOpenEntity(stack, type) {
+  return stack.some((entry) => entry.type === type);
+}
+
 function markdownToEntities(markdownText) {
   const normalized = preProcessMd(markdownText);
   const tokens = md.parse(normalized, {});
@@ -325,6 +329,15 @@ function markdownToEntities(markdownText) {
         break;
       case "heading_close":
         closeEntity(entities, stack, "bold", text.length);
+        appendBlockGap();
+        break;
+      case "blockquote_open":
+        if (!hasOpenEntity(stack, "blockquote")) {
+          openEntity("blockquote");
+        }
+        break;
+      case "blockquote_close":
+        closeEntity(entities, stack, "blockquote", text.length);
         appendBlockGap();
         break;
       case "inline":

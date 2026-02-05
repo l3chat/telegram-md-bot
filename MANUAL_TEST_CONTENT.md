@@ -30,6 +30,13 @@ Autolink: https://example.com
 
 ---
 
+## Quotes
+
+> This is a quoted line.
+> It should render as a single blockquote.
+
+---
+
 ## Lists
 
 - Simple list item
