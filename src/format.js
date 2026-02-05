@@ -351,12 +351,12 @@ function markdownToEntities(markdownText) {
         append(content);
         const info =
           typeof token.info === "string" ? token.info.trim().split(/\s+/)[0] : "";
-        const extra = info ? { language: info } : null;
+        const language = info || "plaintext";
         entities.push({
           type: "pre",
           offset: start,
           length: content.length,
-          ...(extra || {}),
+          language,
         });
         appendBlockGap();
         break;
