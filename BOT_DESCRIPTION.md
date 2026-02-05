@@ -1,0 +1,1 @@
+Friendly Telegram bot that converts your Markdown into Telegram message entities (no HTML parse_mode). Supports bold, italic, strikethrough, inline code, fenced code blocks (pre), blockquotes, links, headings, and flat lists. Tables are rendered as plain text. Replies use `text` + `entities` and long messages are split safely.
