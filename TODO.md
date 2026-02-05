@@ -11,3 +11,5 @@
 11. [x] Separate formatting logic from the Worker handler into a module (e.g., `src/format.js`).
 12. [x] Add a Markdown test content file for Telegram copy/paste (`MANUAL_TEST_CONTENT.md`).
 13. [x] Add fixture-based test for `MANUAL_TEST_CONTENT.md`.
+14. [ ] Roadmap: Advanced table rendering.
+15. [ ] Roadmap: Quote blocks.

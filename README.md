@@ -370,9 +370,6 @@ Do I need to change bot settings?
 
 - Advanced table rendering
 - Quote blocks
-- Export to PDF
-- Channel publishing mode
-- Template support
 
 ---
 
