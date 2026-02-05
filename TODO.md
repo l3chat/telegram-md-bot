@@ -9,3 +9,4 @@
 9. [x] Centralize constants like max message length and separator text.
 10. [x] Add basic CI for `npm test` and optionally lint/format tooling.
 11. [x] Separate formatting logic from the Worker handler into a module (e.g., `src/format.js`).
+12. [x] Add a Markdown test content file for Telegram copy/paste (`MANUAL_TEST_CONTENT.md`).
