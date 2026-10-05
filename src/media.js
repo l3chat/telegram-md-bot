@@ -59,14 +59,14 @@ function isMarkdownLikeDocument(document) {
   );
 }
 
-function detectIncomingMedia(message, session = emptyMediaSession()) {
+function detectIncomingMedia(message) {
   if (Array.isArray(message?.photo) && message.photo.length > 0) {
     const photo = message.photo[message.photo.length - 1];
     return {
       kind: "photo",
       file_id: photo.file_id,
       file_name: null,
-      alias: nextAlias(session, "photo"),
+      alias: null,
       mime_type: "image/jpeg",
       message_id: message.message_id,
     };
@@ -78,9 +78,7 @@ function detectIncomingMedia(message, session = emptyMediaSession()) {
       kind: "audio",
       file_id: audio.file_id,
       file_name: audio.file_name || null,
-      alias:
-        sanitizeAlias(audio.file_name) ||
-        nextAlias(session, "audio"),
+      alias: sanitizeAlias(audio.file_name) || null,
       mime_type: audio.mime_type || "audio/mpeg",
       message_id: message.message_id,
     };
@@ -92,7 +90,7 @@ function detectIncomingMedia(message, session = emptyMediaSession()) {
       kind: "voice",
       file_id: voice.file_id,
       file_name: null,
-      alias: nextAlias(session, "voice"),
+      alias: null,
       mime_type: voice.mime_type || "audio/ogg",
       message_id: message.message_id,
     };
@@ -104,9 +102,7 @@ function detectIncomingMedia(message, session = emptyMediaSession()) {
       kind: "video",
       file_id: video.file_id,
       file_name: video.file_name || null,
-      alias:
-        sanitizeAlias(video.file_name) ||
-        nextAlias(session, "video"),
+      alias: sanitizeAlias(video.file_name) || null,
       mime_type: video.mime_type || "video/mp4",
       message_id: message.message_id,
     };
@@ -118,15 +114,21 @@ function detectIncomingMedia(message, session = emptyMediaSession()) {
       kind: "document",
       file_id: document.file_id,
       file_name: document.file_name || null,
-      alias:
-        sanitizeAlias(document.file_name) ||
-        nextAlias(session, "file"),
+      alias: sanitizeAlias(document.file_name) || null,
       mime_type: document.mime_type || "application/octet-stream",
       message_id: message.message_id,
     };
   }
 
   return null;
+}
+
+function mediaPrefix(kind) {
+  if (kind === "photo") return "photo";
+  if (kind === "voice") return "voice";
+  if (kind === "audio") return "audio";
+  if (kind === "video") return "video";
+  return "file";
 }
 
 function addMediaToSession(session, item) {
@@ -136,11 +138,14 @@ function addMediaToSession(session, item) {
     items: Array.isArray(session?.items) ? [...session.items] : [],
   };
 
-  const normalizedAlias = normalizeRef(item.alias);
-  next.items = next.items.filter(
-    (existing) => normalizeRef(existing.alias) !== normalizedAlias
-  );
-  next.items.push(item);
+  const preferred = sanitizeAlias(item.alias || item.file_name);
+  const used = new Set(next.items.map((existing) => normalizeRef(existing.alias)));
+  const alias =
+    preferred && !used.has(normalizeRef(preferred))
+      ? preferred
+      : nextAlias(next, mediaPrefix(item.kind));
+
+  next.items.push({ ...item, alias });
 
   if (next.items.length > 60) next.items = next.items.slice(-60);
   return next;
@@ -324,31 +329,6 @@ function prepareRichMarkdownMedia(
   };
 }
 
-async function loadMediaSession(store, key) {
-  if (!store) return emptyMediaSession();
-  const session = await store.get(key, { type: "json" });
-  if (!session || !Array.isArray(session.items)) return emptyMediaSession();
-  return {
-    ...emptyMediaSession(),
-    ...session,
-    items: session.items,
-  };
-}
-
-async function saveMediaSession(store, key, session) {
-  if (!store) return false;
-  await store.put(key, JSON.stringify(session), {
-    expirationTtl: MEDIA_SESSION_TTL_SECONDS,
-  });
-  return true;
-}
-
-async function clearMediaSession(store, key) {
-  if (!store) return false;
-  await store.delete(key);
-  return true;
-}
-
 function mediaStoredText(item, locale = "en") {
   const kindKey =
     item.kind === "photo"
@@ -403,9 +383,6 @@ export {
   setPendingMarkdown,
   touchSession,
   prepareRichMarkdownMedia,
-  loadMediaSession,
-  saveMediaSession,
-  clearMediaSession,
   mediaStoredText,
   mediaListText,
 };
