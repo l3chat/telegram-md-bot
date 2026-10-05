@@ -94,7 +94,7 @@ export default {
   async fetch(request, env) {
     // For quick health-check in browser
     if (request.method === "GET") {
-      return new Response("tg-md-bot: OK");
+      return new Response("tg-md-bot: OK help-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
