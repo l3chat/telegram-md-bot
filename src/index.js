@@ -3,6 +3,12 @@ import {
   splitTelegramWithEntities,
 } from "./format.js";
 import {
+  localeFromMessage,
+  localeFromHelpCommand,
+  t,
+  helpMarkdown,
+} from "./i18n.js";
+import {
   mediaSessionKey,
   isMarkdownLikeDocument,
   detectIncomingMedia,
@@ -16,34 +22,6 @@ import {
   mediaStoredText,
   mediaListText,
 } from "./media.js";
-
-const HELP_MARKDOWN = [
-  "# Markdown Formatter",
-  "",
-  "Бот превращает Markdown в **одно красиво оформленное Rich Message**.",
-  "",
-  "## Текст без медиа",
-  "",
-  "Пришлите Markdown прямо сообщением или файлом `.md`, `.markdown` или `.txt`.",
-  "",
-  "## Текст + картинки / аудио / видео / файлы",
-  "",
-  "Самый простой способ:",
-  "",
-  "1. Сначала пришлите все медиа.",
-  "2. Затем пришлите Markdown-текст или `.md/.txt`.",
-  "3. Бот **сам создаст внутренние ссылки** и соберёт всё в одно Rich Message.",
-  "",
-  "Если в Markdown уже есть строка вроде `![](photo.jpg)`, а файл `photo.jpg` был прислан, он будет вставлен именно туда. Медиа, на которые нет явных ссылок, добавляются в конец автоматически.",
-  "",
-  "Фото с подписью можно отправить одним сообщением: подпись будет использована как Markdown.",
-  "",
-  "Для пакетов/альбомов, где Telegram присылает части отдельными update-сообщениями, используйте `/send` после последнего файла.",
-  "",
-  "Команды: `/media` — показать ожидающие медиа, `/send` — собрать текущий черновик, `/clear` — очистить черновик, `/help` — подсказка.",
-  "",
-  "> Внутренние `tg://...` ссылки пользователь писать не должен — их строит бот."
-].join("\n");
 
 async function tgCall(method, token, payload) {
   const url = `https://api.telegram.org/bot${token}/${method}`;
@@ -123,7 +101,7 @@ async function sendPreparedDraft(chatId, token, store, sessionKey, session, mark
   if (prepared.tooMany) {
     await tgCall("sendMessage", token, {
       chat_id: chatId,
-      text: "В одном Rich Message можно использовать не более 50 медиа-вложений.",
+      text: t(locale, "tooManyMedia"),
     });
     return false;
   }
@@ -132,9 +110,11 @@ async function sendPreparedDraft(chatId, token, store, sessionKey, session, mark
     await tgCall("sendMessage", token, {
       chat_id: chatId,
       text:
-        "Не найдены медиа:\n\n" +
+        t(locale, "missingMediaHeader") +
+        "\n\n" +
         prepared.missing.map((name) => "• " + name).join("\n") +
-        "\n\nПришлите эти файлы боту или удалите соответствующие ссылки из Markdown.",
+        "\n\n" +
+        t(locale, "missingMediaFooter"),
     });
     return false;
   }
@@ -165,9 +145,11 @@ export default {
     if (!message || !chatId) return new Response("OK");
 
     const sessionKey = mediaSessionKey(message);
+    const locale = localeFromMessage(message);
 
     if (isHelpCommand(message.text)) {
-      await sendMarkdown(chatId, HELP_MARKDOWN, env.BOT_TOKEN);
+      const helpLocale = localeFromHelpCommand(message.text, locale);
+      await sendMarkdown(chatId, helpMarkdown(helpLocale), env.BOT_TOKEN);
       return new Response("OK");
     }
 
@@ -175,7 +157,7 @@ export default {
       const session = await loadMediaSession(env.MEDIA_STORE, sessionKey);
       await tgCall("sendMessage", env.BOT_TOKEN, {
         chat_id: chatId,
-        text: mediaListText(session),
+        text: mediaListText(session, locale),
       });
       return new Response("OK");
     }
@@ -185,8 +167,8 @@ export default {
       await tgCall("sendMessage", env.BOT_TOKEN, {
         chat_id: chatId,
         text: env.MEDIA_STORE
-          ? "Черновик очищен."
-          : "Хранилище медиа пока не подключено.",
+          ? t(locale, "draftCleared")
+          : t(locale, "storageMissing"),
       });
       return new Response("OK");
     }
@@ -196,8 +178,7 @@ export default {
       if (!session.markdown) {
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text:
-            "В черновике нет текста. Пришлите Markdown-текст или .md/.txt-файл.",
+          text: t(locale, "noDraftText"),
         });
         return new Response("OK");
       }
@@ -215,7 +196,7 @@ export default {
         console.error("Failed to send draft", error);
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text: "Не удалось собрать Rich Message из текущего черновика.",
+          text: t(locale, "draftSendFailed"),
         });
       }
       return new Response("OK");
@@ -228,8 +209,7 @@ export default {
       if (!env.MEDIA_STORE) {
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text:
-            "Для автоматической сборки текста с медиа нужно подключить Cloudflare KV binding MEDIA_STORE.",
+          text: t(locale, "mediaStorageNeeded"),
         });
         return new Response("OK");
       }
@@ -259,7 +239,7 @@ export default {
           console.error("Failed to send caption+media Rich Message", error);
           await tgCall("sendMessage", env.BOT_TOKEN, {
             chat_id: chatId,
-            text: "Не удалось собрать Rich Message из подписи и медиа.",
+            text: t(locale, "captionMediaFailed"),
           });
         }
         return new Response("OK");
@@ -268,9 +248,9 @@ export default {
       await tgCall("sendMessage", env.BOT_TOKEN, {
         chat_id: chatId,
         text:
-          mediaStoredText(incomingMedia) +
+          mediaStoredText(incomingMedia, locale) +
           (message.media_group_id
-            ? "\n\nЭто часть альбома. После последнего элемента пришлите /send или Markdown-текст."
+            ? "\n\n" + t(locale, "albumHint")
             : ""),
       });
       return new Response("OK");
@@ -282,8 +262,7 @@ export default {
       if (!isMarkdownDocument(message.document)) {
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text:
-            "Текстовый документ должен быть .md, .markdown или .txt. Остальные файлы бот воспринимает как вложения.",
+          text: t(locale, "textDocumentExpected"),
         });
         return new Response("OK");
       }
@@ -294,8 +273,7 @@ export default {
         console.error("Failed to read uploaded document", error);
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text:
-            "Не удалось прочитать текстовый файл. Используйте UTF-8 .md/.markdown/.txt.",
+          text: t(locale, "textDocumentReadFailed"),
         });
         return new Response("OK");
       }
@@ -326,7 +304,7 @@ export default {
         console.error("Failed to send Rich Message with auto media", error);
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text: "Не удалось собрать Rich Message с присланными медиа.",
+          text: t(locale, "autoMediaFailed"),
         });
       }
       return new Response("OK");
@@ -338,7 +316,6 @@ export default {
 };
 
 export {
-  HELP_MARKDOWN,
   markdownToEntities,
   splitTelegramWithEntities,
   isCommand,
