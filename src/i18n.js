@@ -1,0 +1,251 @@
+const SUPPORTED_LOCALES = ["ru", "en", "de", "fr"];
+
+function normalizeLocale(value) {
+  const raw = String(value || "").trim().toLowerCase().replace("_", "-");
+  const base = raw.split("-")[0];
+  return SUPPORTED_LOCALES.includes(base) ? base : "en";
+}
+
+function localeFromMessage(message) {
+  return normalizeLocale(message?.from?.language_code);
+}
+
+function localeFromHelpCommand(text, fallback) {
+  const match = String(text || "").trim().match(
+    /^\/(?:start|help)(?:@[A-Za-z0-9_]+)?(?:\s+(ru|en|de|fr))?\s*$/i
+  );
+  return match?.[1] ? normalizeLocale(match[1]) : normalizeLocale(fallback);
+}
+
+const TEXT = {
+  ru: {
+    help: [
+      "# Markdown Formatter",
+      "",
+      "Бот превращает Markdown в **одно красиво оформленное Rich Message**.",
+      "",
+      "## Текст без медиа",
+      "",
+      "Пришлите Markdown прямо сообщением или файлом `.md`, `.markdown` или `.txt`.",
+      "",
+      "## Текст + картинки / аудио / видео / файлы",
+      "",
+      "Самый простой способ:",
+      "",
+      "1. Сначала пришлите все медиа.",
+      "2. Затем пришлите Markdown-текст или `.md/.txt`.",
+      "3. Бот **сам создаст внутренние ссылки** и соберёт всё в одно Rich Message.",
+      "",
+      "Если в Markdown уже есть строка вроде `![](photo.jpg)`, а файл `photo.jpg` был прислан, он будет вставлен именно туда. Медиа без явной ссылки добавляются в конец автоматически.",
+      "",
+      "Фото с подписью можно отправить одним сообщением: подпись будет использована как Markdown.",
+      "",
+      "Если Telegram отправляет альбом частями, после последнего элемента используйте `/send`.",
+      "",
+      "Команды: `/media` — показать ожидающие медиа, `/send` — собрать текущий черновик, `/clear` — очистить черновик, `/help` — подсказка.",
+      "",
+      "Другой язык: `/help en`, `/help de`, `/help fr`, `/help ru`.",
+      "",
+      "> Внутренние `tg://...` ссылки пользователь писать не должен — их строит бот."
+    ].join("\n"),
+    draftCleared: "Черновик очищен.",
+    storageMissing: "Хранилище медиа пока не подключено.",
+    noDraftText: "В черновике нет текста. Пришлите Markdown-текст или .md/.txt-файл.",
+    draftSendFailed: "Не удалось собрать Rich Message из текущего черновика.",
+    mediaStorageNeeded: "Для автоматической сборки текста с медиа нужно подключить Cloudflare KV binding MEDIA_STORE.",
+    captionMediaFailed: "Не удалось собрать Rich Message из подписи и медиа.",
+    albumHint: "Это часть альбома. После последнего элемента пришлите /send или Markdown-текст.",
+    textDocumentExpected: "Текстовый документ должен быть .md, .markdown или .txt. Остальные файлы бот воспринимает как вложения.",
+    textDocumentReadFailed: "Не удалось прочитать текстовый файл. Используйте UTF-8 .md/.markdown/.txt.",
+    tooManyMedia: "В одном Rich Message можно использовать не более 50 медиа-вложений.",
+    missingMediaHeader: "Не найдены медиа:",
+    missingMediaFooter: "Пришлите эти файлы боту или удалите соответствующие ссылки из Markdown.",
+    autoMediaFailed: "Не удалось собрать Rich Message с присланными медиа.",
+    mediaReceived: "получено. Теперь пришлите Markdown-текст или .md/.txt-файл. Ссылки вручную писать не нужно — бот добавит медиа автоматически.",
+    pendingNone: "Ожидающих картинок, аудио и файлов сейчас нет.",
+    pendingTitle: "Ожидающие медиа:",
+    pendingFooter: "Если Markdown содержит имя файла, медиа будет вставлено в указанное место. Остальные файлы бот добавит в конец автоматически.",
+    kindPhoto: "Фото",
+    kindVoice: "Голосовая запись",
+    kindAudio: "Аудио",
+    kindVideo: "Видео",
+    kindFile: "Файл"
+  },
+  en: {
+    help: [
+      "# Markdown Formatter",
+      "",
+      "This bot turns Markdown into **one nicely formatted Telegram Rich Message**.",
+      "",
+      "## Text only",
+      "",
+      "Send Markdown as a message or as a `.md`, `.markdown`, or `.txt` file.",
+      "",
+      "## Text + images / audio / video / files",
+      "",
+      "The easiest workflow:",
+      "",
+      "1. Send all media first.",
+      "2. Then send the Markdown text or a `.md/.txt` file.",
+      "3. The bot **creates the internal links automatically** and builds one Rich Message.",
+      "",
+      "If Markdown already contains something like `![](photo.jpg)` and `photo.jpg` was uploaded, the file is inserted at that exact place. Unreferenced media are appended automatically.",
+      "",
+      "You can also send one photo with a caption; the caption is treated as Markdown.",
+      "",
+      "If Telegram sends an album as separate updates, use `/send` after the last item.",
+      "",
+      "Commands: `/media` — show pending media, `/send` — build the current draft, `/clear` — clear the draft, `/help` — show help.",
+      "",
+      "Other languages: `/help ru`, `/help de`, `/help fr`, `/help en`.",
+      "",
+      "> You never need to write internal `tg://...` links yourself — the bot creates them."
+    ].join("\n"),
+    draftCleared: "Draft cleared.",
+    storageMissing: "Media storage is not configured yet.",
+    noDraftText: "There is no text in the draft. Send Markdown text or a .md/.txt file.",
+    draftSendFailed: "Could not build a Rich Message from the current draft.",
+    mediaStorageNeeded: "Automatic media assembly requires the Cloudflare KV binding MEDIA_STORE.",
+    captionMediaFailed: "Could not build a Rich Message from the caption and media.",
+    albumHint: "This is part of an album. After the last item, send /send or the Markdown text.",
+    textDocumentExpected: "A text document must be .md, .markdown, or .txt. Other files are treated as attachments.",
+    textDocumentReadFailed: "Could not read the text file. Use UTF-8 .md/.markdown/.txt.",
+    tooManyMedia: "One Rich Message can contain at most 50 media items.",
+    missingMediaHeader: "Media not found:",
+    missingMediaFooter: "Send these files to the bot or remove the matching references from Markdown.",
+    autoMediaFailed: "Could not build a Rich Message with the uploaded media.",
+    mediaReceived: "received. Now send Markdown text or a .md/.txt file. You do not need to write links manually — the bot adds the media automatically.",
+    pendingNone: "There are no pending images, audio files, or attachments.",
+    pendingTitle: "Pending media:",
+    pendingFooter: "If Markdown contains a file name, that media is inserted there. All other files are appended automatically.",
+    kindPhoto: "Photo",
+    kindVoice: "Voice message",
+    kindAudio: "Audio",
+    kindVideo: "Video",
+    kindFile: "File"
+  },
+  de: {
+    help: [
+      "# Markdown Formatter",
+      "",
+      "Dieser Bot verwandelt Markdown in **eine einzige schön formatierte Telegram Rich Message**.",
+      "",
+      "## Nur Text",
+      "",
+      "Sende Markdown direkt als Nachricht oder als `.md`-, `.markdown`- oder `.txt`-Datei.",
+      "",
+      "## Text + Bilder / Audio / Video / Dateien",
+      "",
+      "Am einfachsten:",
+      "",
+      "1. Zuerst alle Mediendateien senden.",
+      "2. Danach den Markdown-Text oder eine `.md/.txt`-Datei senden.",
+      "3. Der Bot **erzeugt die internen Links automatisch** und baut daraus eine Rich Message.",
+      "",
+      "Steht im Markdown bereits z. B. `![](photo.jpg)` und wurde `photo.jpg` gesendet, wird die Datei genau dort eingefügt. Nicht referenzierte Medien werden automatisch am Ende ergänzt.",
+      "",
+      "Ein einzelnes Foto kann auch mit einer Beschriftung gesendet werden; die Beschriftung wird als Markdown verwendet.",
+      "",
+      "Wenn Telegram ein Album in mehreren Updates liefert, nach dem letzten Element `/send` senden.",
+      "",
+      "Befehle: `/media` — wartende Medien anzeigen, `/send` — aktuellen Entwurf erstellen, `/clear` — Entwurf löschen, `/help` — Hilfe.",
+      "",
+      "Andere Sprache: `/help ru`, `/help en`, `/help fr`, `/help de`.",
+      "",
+      "> Interne `tg://...`-Links müssen nie von Hand geschrieben werden — der Bot erzeugt sie."
+    ].join("\n"),
+    draftCleared: "Entwurf gelöscht.",
+    storageMissing: "Der Medienspeicher ist noch nicht eingerichtet.",
+    noDraftText: "Der Entwurf enthält keinen Text. Sende Markdown-Text oder eine .md/.txt-Datei.",
+    draftSendFailed: "Aus dem aktuellen Entwurf konnte keine Rich Message erstellt werden.",
+    mediaStorageNeeded: "Für die automatische Medienzusammenstellung wird die Cloudflare-KV-Bindung MEDIA_STORE benötigt.",
+    captionMediaFailed: "Rich Message aus Beschriftung und Medium konnte nicht erstellt werden.",
+    albumHint: "Dies ist Teil eines Albums. Nach dem letzten Element /send oder den Markdown-Text senden.",
+    textDocumentExpected: "Eine Textdatei muss .md, .markdown oder .txt sein. Andere Dateien werden als Anhänge behandelt.",
+    textDocumentReadFailed: "Die Textdatei konnte nicht gelesen werden. Bitte UTF-8 .md/.markdown/.txt verwenden.",
+    tooManyMedia: "Eine Rich Message kann höchstens 50 Medienelemente enthalten.",
+    missingMediaHeader: "Medien nicht gefunden:",
+    missingMediaFooter: "Sende diese Dateien an den Bot oder entferne die entsprechenden Verweise aus dem Markdown.",
+    autoMediaFailed: "Rich Message mit den gesendeten Medien konnte nicht erstellt werden.",
+    mediaReceived: "empfangen. Sende jetzt Markdown-Text oder eine .md/.txt-Datei. Links müssen nicht von Hand geschrieben werden — der Bot fügt die Medien automatisch ein.",
+    pendingNone: "Derzeit warten keine Bilder, Audiodateien oder Anhänge.",
+    pendingTitle: "Wartende Medien:",
+    pendingFooter: "Wenn Markdown einen Dateinamen enthält, wird das Medium dort eingefügt. Alle übrigen Dateien werden automatisch angehängt.",
+    kindPhoto: "Foto",
+    kindVoice: "Sprachnachricht",
+    kindAudio: "Audio",
+    kindVideo: "Video",
+    kindFile: "Datei"
+  },
+  fr: {
+    help: [
+      "# Markdown Formatter",
+      "",
+      "Ce bot transforme Markdown en **un seul Rich Message Telegram bien formaté**.",
+      "",
+      "## Texte uniquement",
+      "",
+      "Envoyez Markdown directement comme message ou comme fichier `.md`, `.markdown` ou `.txt`.",
+      "",
+      "## Texte + images / audio / vidéo / fichiers",
+      "",
+      "La méthode la plus simple :",
+      "",
+      "1. Envoyez d’abord tous les médias.",
+      "2. Envoyez ensuite le texte Markdown ou un fichier `.md/.txt`.",
+      "3. Le bot **crée automatiquement les liens internes** et construit un seul Rich Message.",
+      "",
+      "Si Markdown contient déjà, par exemple, `![](photo.jpg)` et que `photo.jpg` a été envoyé, le fichier sera inséré exactement à cet endroit. Les médias non référencés sont ajoutés automatiquement à la fin.",
+      "",
+      "Vous pouvez aussi envoyer une photo avec une légende ; la légende sera interprétée comme Markdown.",
+      "",
+      "Si Telegram envoie un album en plusieurs mises à jour, utilisez `/send` après le dernier élément.",
+      "",
+      "Commandes : `/media` — afficher les médias en attente, `/send` — construire le brouillon actuel, `/clear` — effacer le brouillon, `/help` — aide.",
+      "",
+      "Autre langue : `/help ru`, `/help en`, `/help de`, `/help fr`.",
+      "",
+      "> Vous n’avez jamais besoin d’écrire les liens internes `tg://...` vous-même — le bot les crée."
+    ].join("\n"),
+    draftCleared: "Brouillon effacé.",
+    storageMissing: "Le stockage des médias n’est pas encore configuré.",
+    noDraftText: "Le brouillon ne contient pas de texte. Envoyez du Markdown ou un fichier .md/.txt.",
+    draftSendFailed: "Impossible de construire un Rich Message à partir du brouillon actuel.",
+    mediaStorageNeeded: "L’assemblage automatique des médias nécessite la liaison Cloudflare KV MEDIA_STORE.",
+    captionMediaFailed: "Impossible de construire un Rich Message à partir de la légende et du média.",
+    albumHint: "Ceci fait partie d’un album. Après le dernier élément, envoyez /send ou le texte Markdown.",
+    textDocumentExpected: "Un document texte doit être .md, .markdown ou .txt. Les autres fichiers sont traités comme pièces jointes.",
+    textDocumentReadFailed: "Impossible de lire le fichier texte. Utilisez un fichier UTF-8 .md/.markdown/.txt.",
+    tooManyMedia: "Un Rich Message peut contenir au maximum 50 médias.",
+    missingMediaHeader: "Médias introuvables :",
+    missingMediaFooter: "Envoyez ces fichiers au bot ou supprimez les références correspondantes du Markdown.",
+    autoMediaFailed: "Impossible de construire le Rich Message avec les médias envoyés.",
+    mediaReceived: "reçu. Envoyez maintenant le texte Markdown ou un fichier .md/.txt. Il n’est pas nécessaire d’écrire les liens à la main — le bot ajoute les médias automatiquement.",
+    pendingNone: "Aucune image, piste audio ou pièce jointe n’est en attente.",
+    pendingTitle: "Médias en attente :",
+    pendingFooter: "Si Markdown contient un nom de fichier, le média sera inséré à cet endroit. Les autres fichiers sont ajoutés automatiquement à la fin.",
+    kindPhoto: "Photo",
+    kindVoice: "Message vocal",
+    kindAudio: "Audio",
+    kindVideo: "Vidéo",
+    kindFile: "Fichier"
+  }
+};
+
+function t(locale, key) {
+  const lang = normalizeLocale(locale);
+  return TEXT[lang]?.[key] ?? TEXT.en[key] ?? key;
+}
+
+function helpMarkdown(locale) {
+  return t(locale, "help");
+}
+
+export {
+  SUPPORTED_LOCALES,
+  normalizeLocale,
+  localeFromMessage,
+  localeFromHelpCommand,
+  t,
+  helpMarkdown,
+};
