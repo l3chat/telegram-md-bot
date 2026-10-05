@@ -20,7 +20,7 @@ test("photo upload gets a reusable alias", () => {
 
   assert.equal(item.kind, "photo");
   assert.equal(item.file_id, "large");
-  assert.equal(item.alias, "photo_1");
+  assert.equal(item.alias, null);
 });
 
 test("audio upload keeps its filename as alias", () => {
@@ -119,4 +119,27 @@ test("unreferenced uploaded media are appended automatically", () => {
   assert.ok(prepared.markdown.includes("tg://photo?id=media_1"));
   assert.ok(prepared.markdown.includes("tg://audio?id=media_2"));
   assert.equal(prepared.usedCount, 2);
+});
+
+
+test("session assigns generated aliases atomically", () => {
+  let session = emptyMediaSession();
+
+  session = addMediaToSession(session, {
+    kind: "photo",
+    file_id: "p1",
+    file_name: null,
+    alias: null,
+    mime_type: "image/jpeg",
+  });
+  session = addMediaToSession(session, {
+    kind: "photo",
+    file_id: "p2",
+    file_name: null,
+    alias: null,
+    mime_type: "image/jpeg",
+  });
+
+  assert.equal(session.items[0].alias, "photo_1");
+  assert.equal(session.items[1].alias, "photo_2");
 });
