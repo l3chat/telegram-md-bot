@@ -1,3 +1,5 @@
+import { t } from "./i18n.js";
+
 const MEDIA_SESSION_TTL_SECONDS = 24 * 60 * 60;
 
 function emptyMediaSession() {
@@ -347,29 +349,25 @@ async function clearMediaSession(store, key) {
   return true;
 }
 
-function mediaStoredText(item) {
-  const label =
+function mediaStoredText(item, locale = "en") {
+  const kindKey =
     item.kind === "photo"
-      ? "Фото"
+      ? "kindPhoto"
       : item.kind === "voice"
-        ? "Голосовая запись"
+        ? "kindVoice"
         : item.kind === "audio"
-          ? "Аудио"
+          ? "kindAudio"
           : item.kind === "video"
-            ? "Видео"
-            : "Файл";
+            ? "kindVideo"
+            : "kindFile";
 
-  return (
-    label +
-    " получено. Теперь пришлите Markdown-текст или .md/.txt-файл. " +
-    "Ссылки вручную писать не нужно — бот добавит медиа автоматически."
-  );
+  return t(locale, kindKey) + " " + t(locale, "mediaReceived");
 }
 
-function mediaListText(session) {
+function mediaListText(session, locale = "en") {
   const items = session?.items || [];
   if (items.length === 0) {
-    return "Ожидающих картинок, аудио и файлов сейчас нет.";
+    return t(locale, "pendingNone");
   }
 
   const lines = items.map((item, index) => {
@@ -387,9 +385,11 @@ function mediaListText(session) {
   });
 
   return (
-    "Ожидающие медиа:\n\n" +
+    t(locale, "pendingTitle") +
+    "\n\n" +
     lines.join("\n") +
-    "\n\nЕсли Markdown содержит имя файла, медиа будет вставлено в указанное место. Остальные файлы бот добавит в конец автоматически."
+    "\n\n" +
+    t(locale, "pendingFooter")
   );
 }
 
