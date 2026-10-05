@@ -1,7 +1,7 @@
 const MEDIA_SESSION_TTL_SECONDS = 24 * 60 * 60;
 
 function emptyMediaSession() {
-  return { items: [] };
+  return { items: [], markdown: null, revision: null, media_group_id: null };
 }
 
 function mediaSessionKey(message) {
@@ -38,23 +38,35 @@ function sanitizeAlias(value) {
 }
 
 function nextAlias(session, prefix) {
-  const used = new Set((session?.items || []).map((item) => normalizeRef(item.alias)));
+  const used = new Set(
+    (session?.items || []).map((item) => normalizeRef(item.alias))
+  );
   let n = 1;
   while (used.has(normalizeRef(prefix + "_" + n))) n += 1;
   return prefix + "_" + n;
 }
 
-function detectIncomingMedia(message, session = emptyMediaSession()) {
-  const explicitAlias = sanitizeAlias(message?.caption);
+function isMarkdownLikeDocument(document) {
+  if (!document) return false;
+  const name = (document.file_name || "").toLowerCase();
+  const mime = (document.mime_type || "").toLowerCase();
+  return (
+    /\.(md|markdown|txt)$/.test(name) ||
+    mime === "text/markdown" ||
+    mime === "text/plain"
+  );
+}
 
+function detectIncomingMedia(message, session = emptyMediaSession()) {
   if (Array.isArray(message?.photo) && message.photo.length > 0) {
     const photo = message.photo[message.photo.length - 1];
     return {
       kind: "photo",
       file_id: photo.file_id,
       file_name: null,
-      alias: explicitAlias || nextAlias(session, "photo"),
+      alias: nextAlias(session, "photo"),
       mime_type: "image/jpeg",
+      message_id: message.message_id,
     };
   }
 
@@ -65,10 +77,10 @@ function detectIncomingMedia(message, session = emptyMediaSession()) {
       file_id: audio.file_id,
       file_name: audio.file_name || null,
       alias:
-        explicitAlias ||
         sanitizeAlias(audio.file_name) ||
         nextAlias(session, "audio"),
       mime_type: audio.mime_type || "audio/mpeg",
+      message_id: message.message_id,
     };
   }
 
@@ -78,8 +90,37 @@ function detectIncomingMedia(message, session = emptyMediaSession()) {
       kind: "voice",
       file_id: voice.file_id,
       file_name: null,
-      alias: explicitAlias || nextAlias(session, "voice"),
+      alias: nextAlias(session, "voice"),
       mime_type: voice.mime_type || "audio/ogg",
+      message_id: message.message_id,
+    };
+  }
+
+  if (message?.video) {
+    const video = message.video;
+    return {
+      kind: "video",
+      file_id: video.file_id,
+      file_name: video.file_name || null,
+      alias:
+        sanitizeAlias(video.file_name) ||
+        nextAlias(session, "video"),
+      mime_type: video.mime_type || "video/mp4",
+      message_id: message.message_id,
+    };
+  }
+
+  if (message?.document && !isMarkdownLikeDocument(message.document)) {
+    const document = message.document;
+    return {
+      kind: "document",
+      file_id: document.file_id,
+      file_name: document.file_name || null,
+      alias:
+        sanitizeAlias(document.file_name) ||
+        nextAlias(session, "file"),
+      mime_type: document.mime_type || "application/octet-stream",
+      message_id: message.message_id,
     };
   }
 
@@ -88,19 +129,41 @@ function detectIncomingMedia(message, session = emptyMediaSession()) {
 
 function addMediaToSession(session, item) {
   const next = {
+    ...emptyMediaSession(),
+    ...session,
     items: Array.isArray(session?.items) ? [...session.items] : [],
   };
 
-  // Reusing an alias replaces the previous media with the new upload.
   const normalizedAlias = normalizeRef(item.alias);
   next.items = next.items.filter(
     (existing) => normalizeRef(existing.alias) !== normalizedAlias
   );
   next.items.push(item);
 
-  // Rich messages support at most 50 media attachments. Keep a little history,
-  // but avoid unbounded KV growth.
   if (next.items.length > 60) next.items = next.items.slice(-60);
+  return next;
+}
+
+function setPendingMarkdown(session, markdown, message) {
+  const next = {
+    ...emptyMediaSession(),
+    ...session,
+    items: Array.isArray(session?.items) ? [...session.items] : [],
+  };
+  next.markdown = String(markdown || "");
+  next.revision = message?.message_id ?? Date.now();
+  next.media_group_id = message?.media_group_id || next.media_group_id || null;
+  return next;
+}
+
+function touchSession(session, message) {
+  const next = {
+    ...emptyMediaSession(),
+    ...session,
+    items: Array.isArray(session?.items) ? [...session.items] : [],
+  };
+  next.revision = message?.message_id ?? Date.now();
+  next.media_group_id = message?.media_group_id || next.media_group_id || null;
   return next;
 }
 
@@ -127,18 +190,72 @@ function isRemoteMediaRef(ref) {
   return /^(https?:\/\/|tg:\/\/)/i.test(String(ref || "").trim());
 }
 
-function prepareRichMarkdownMedia(markdown, session = emptyMediaSession()) {
+function mediaDescriptor(item, id) {
+  const scheme =
+    item.kind === "photo"
+      ? "photo"
+      : item.kind === "video"
+        ? "video"
+        : item.kind === "document"
+          ? "document"
+          : "audio";
+
+  const mediaType = item.kind === "voice" ? "voice_note" : item.kind;
+
+  return {
+    id,
+    scheme,
+    input: {
+      id,
+      media: {
+        type: mediaType,
+        media: item.file_id,
+      },
+    },
+  };
+}
+
+function defaultCaption(item) {
+  if (item.file_name) return item.file_name;
+  if (item.kind === "photo") return "Фото";
+  if (item.kind === "voice") return "Голосовая запись";
+  if (item.kind === "audio") return "Аудио";
+  if (item.kind === "video") return "Видео";
+  return item.alias || "Файл";
+}
+
+function prepareRichMarkdownMedia(
+  markdown,
+  session = emptyMediaSession(),
+  { appendUnreferenced = false } = {}
+) {
   const lookup = makeLookup(session);
   const media = [];
   const missing = [];
+  const used = new Set();
+  const descriptorByItem = new Map();
   let counter = 0;
+  let tooMany = false;
 
-  // Rich Markdown requires media to be a separate block, so only replace image
-  // syntax that occupies its own line.
+  const ensureDescriptor = (item) => {
+    if (descriptorByItem.has(item)) return descriptorByItem.get(item);
+
+    counter += 1;
+    if (counter > 50) {
+      tooMany = true;
+      return null;
+    }
+
+    const descriptor = mediaDescriptor(item, "media_" + counter);
+    descriptorByItem.set(item, descriptor);
+    media.push(descriptor.input);
+    return descriptor;
+  };
+
   const mediaLine =
     /^([ \t]*)!\[([^\]\n]*)\]\(\s*(?:<([^>\n]+)>|([^\s)\n]+))(?:\s+["']([^"'\n]*)["'])?\s*\)[ \t]*$/gm;
 
-  const rewritten = String(markdown || "").replace(
+  let rewritten = String(markdown || "").replace(
     mediaLine,
     (full, indent, alt, angleRef, bareRef, title) => {
       const ref = angleRef || bareRef || "";
@@ -150,43 +267,58 @@ function prepareRichMarkdownMedia(markdown, session = emptyMediaSession()) {
         return full;
       }
 
-      counter += 1;
-      if (counter > 50) return full;
-
-      const id = "media_" + counter;
-      const scheme = item.kind === "photo" ? "photo" : "audio";
-      const mediaType = item.kind === "voice" ? "voice_note" : item.kind;
-
-      media.push({
-        id,
-        media: {
-          type: mediaType,
-          media: item.file_id,
-        },
-      });
+      const descriptor = ensureDescriptor(item);
+      if (!descriptor) return full;
+      used.add(item);
 
       const safeTitle = title
         ? ' "' + String(title).replace(/"/g, "'") + '"'
         : "";
+
       return (
         indent +
         "![" +
         alt +
         "](tg://" +
-        scheme +
+        descriptor.scheme +
         "?id=" +
-        id +
+        descriptor.id +
         safeTitle +
         ")"
       );
     }
   );
 
+  if (appendUnreferenced) {
+    const blocks = [];
+    for (const item of session?.items || []) {
+      if (used.has(item)) continue;
+      const descriptor = ensureDescriptor(item);
+      if (!descriptor) continue;
+      used.add(item);
+      const caption = defaultCaption(item).replace(/"/g, "'");
+      blocks.push(
+        '![](tg://' +
+          descriptor.scheme +
+          "?id=" +
+          descriptor.id +
+          ' "' +
+          caption +
+          '")'
+      );
+    }
+
+    if (blocks.length > 0) {
+      rewritten = rewritten.trimEnd() + "\n\n" + blocks.join("\n\n");
+    }
+  }
+
   return {
     markdown: rewritten,
     media,
     missing: [...new Set(missing)],
-    tooMany: counter > 50,
+    tooMany,
+    usedCount: used.size,
   };
 }
 
@@ -194,7 +326,11 @@ async function loadMediaSession(store, key) {
   if (!store) return emptyMediaSession();
   const session = await store.get(key, { type: "json" });
   if (!session || !Array.isArray(session.items)) return emptyMediaSession();
-  return session;
+  return {
+    ...emptyMediaSession(),
+    ...session,
+    items: session.items,
+  };
 }
 
 async function saveMediaSession(store, key, session) {
@@ -211,44 +347,49 @@ async function clearMediaSession(store, key) {
   return true;
 }
 
-function mediaSnippet(item) {
-  return '![](' + item.alias + ' "Подпись")';
-}
-
 function mediaStoredText(item) {
   const label =
     item.kind === "photo"
       ? "Фото"
       : item.kind === "voice"
         ? "Голосовая запись"
-        : "Аудио";
+        : item.kind === "audio"
+          ? "Аудио"
+          : item.kind === "video"
+            ? "Видео"
+            : "Файл";
 
   return (
     label +
-    " сохранено как " +
-    item.alias +
-    ".\n\nВ Markdown вставьте отдельной строкой:\n" +
-    mediaSnippet(item) +
-    "\n\nПосле этого пришлите Markdown-текст или .md-файл."
+    " получено. Теперь пришлите Markdown-текст или .md/.txt-файл. " +
+    "Ссылки вручную писать не нужно — бот добавит медиа автоматически."
   );
 }
 
 function mediaListText(session) {
   const items = session?.items || [];
   if (items.length === 0) {
-    return "Сохранённых картинок и аудио пока нет.";
+    return "Ожидающих картинок, аудио и файлов сейчас нет.";
   }
 
   const lines = items.map((item, index) => {
     const marker =
-      item.kind === "photo" ? "🖼" : item.kind === "voice" ? "🎙" : "🎵";
+      item.kind === "photo"
+        ? "🖼"
+        : item.kind === "voice"
+          ? "🎙"
+          : item.kind === "audio"
+            ? "🎵"
+            : item.kind === "video"
+              ? "🎬"
+              : "📎";
     return String(index + 1) + ". " + marker + " " + item.alias;
   });
 
   return (
-    "Сохранённые медиа (хранятся 24 часа):\n\n" +
+    "Ожидающие медиа:\n\n" +
     lines.join("\n") +
-    "\n\n/media — показать список\n/clear — очистить список"
+    "\n\nЕсли Markdown содержит имя файла, медиа будет вставлено в указанное место. Остальные файлы бот добавит в конец автоматически."
   );
 }
 
@@ -256,8 +397,11 @@ export {
   MEDIA_SESSION_TTL_SECONDS,
   emptyMediaSession,
   mediaSessionKey,
+  isMarkdownLikeDocument,
   detectIncomingMedia,
   addMediaToSession,
+  setPendingMarkdown,
+  touchSession,
   prepareRichMarkdownMedia,
   loadMediaSession,
   saveMediaSession,
