@@ -3,6 +3,23 @@ import {
   splitTelegramWithEntities,
 } from "./format.js";
 
+const HELP_MARKDOWN = `# Markdown Formatter
+
+Бот превращает Markdown в **одно красиво оформленное сообщение Telegram**.
+
+## Как пользоваться
+
+1. **Короткий текст** — пришлите Markdown прямо сообщением.
+2. **Длинный текст** — лучше пришлите файл `.md`, `.markdown` или `.txt` в UTF-8.
+3. Бот вернёт готовое форматированное сообщение.
+4. **Перешлите его в нужный чат** — так форматирование сохраняется надёжнее всего.
+
+Поддерживаются заголовки, **жирный текст**, *курсив*, списки, цитаты, ссылки, код и таблицы.
+
+> Подсказка: обычное сообщение Telegram ограничено по длине, поэтому для больших документов удобнее отправлять боту Markdown-файл.
+
+Команда `/help` показывает эту подсказку снова.`;
+
 // Make a Telegram Bot API call.
 // Throws if Telegram returns ok: false, so upstream can log/fail.
 async function tgCall(method, token, payload) {
@@ -15,6 +32,10 @@ async function tgCall(method, token, payload) {
   const data = await r.json();
   if (!data.ok) throw new Error(`${method} failed: ${JSON.stringify(data)}`);
   return data;
+}
+
+function isHelpCommand(text) {
+  return /^\/(start|help)(?:@[A-Za-z0-9_]+)?(?:\s|$)/i.test(text || "");
 }
 
 function isMarkdownDocument(document) {
@@ -91,6 +112,11 @@ export default {
     const chatId = message?.chat?.id;
     if (!message || !chatId) return new Response("OK");
 
+    if (isHelpCommand(message.text)) {
+      await sendMarkdown(chatId, HELP_MARKDOWN, env.BOT_TOKEN);
+      return new Response("OK");
+    }
+
     let markdown = message.text;
 
     // Long Markdown cannot be pasted into one ordinary Telegram message,
@@ -99,7 +125,7 @@ export default {
       if (!isMarkdownDocument(message.document)) {
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text: "Send Markdown as text or attach a .md, .markdown, or .txt file.",
+          text: "Пришлите Markdown-текст или файл .md, .markdown или .txt.",
         });
         return new Response("OK");
       }
@@ -110,7 +136,7 @@ export default {
         console.error("Failed to read uploaded document", error);
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text: "I couldn't read that file. Please try again with a UTF-8 .md or .txt file.",
+          text: "Не удалось прочитать файл. Попробуйте ещё раз с UTF-8 файлом .md или .txt.",
         });
         return new Response("OK");
       }
@@ -125,8 +151,10 @@ export default {
 
 // Named exports for unit tests.
 export {
+  HELP_MARKDOWN,
   markdownToEntities,
   splitTelegramWithEntities,
+  isHelpCommand,
   isMarkdownDocument,
   sendMarkdown,
 };
