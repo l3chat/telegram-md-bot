@@ -91,3 +91,32 @@ test("missing local media is reported", () => {
 
   assert.deepEqual(prepared.missing, ["missing.png"]);
 });
+
+
+test("unreferenced uploaded media are appended automatically", () => {
+  let session = addMediaToSession(emptyMediaSession(), {
+    kind: "photo",
+    file_id: "photo-id",
+    file_name: null,
+    alias: "photo_1",
+    mime_type: "image/jpeg",
+  });
+  session = addMediaToSession(session, {
+    kind: "audio",
+    file_id: "audio-id",
+    file_name: "lesson.mp3",
+    alias: "lesson.mp3",
+    mime_type: "audio/mpeg",
+  });
+
+  const prepared = prepareRichMarkdownMedia(
+    "# Notes\n\nHello.",
+    session,
+    { appendUnreferenced: true }
+  );
+
+  assert.equal(prepared.media.length, 2);
+  assert.ok(prepared.markdown.includes("tg://photo?id=media_1"));
+  assert.ok(prepared.markdown.includes("tg://audio?id=media_2"));
+  assert.equal(prepared.usedCount, 2);
+});
