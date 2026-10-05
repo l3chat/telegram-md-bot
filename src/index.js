@@ -9,19 +9,22 @@ import {
   helpMarkdown,
 } from "./i18n.js";
 import {
-  mediaSessionKey,
   isMarkdownLikeDocument,
   detectIncomingMedia,
-  addMediaToSession,
-  setPendingMarkdown,
-  touchSession,
   prepareRichMarkdownMedia,
-  loadMediaSession,
-  saveMediaSession,
-  clearMediaSession,
   mediaStoredText,
   mediaListText,
 } from "./media.js";
+import {
+  DraftSession,
+  draftSessionStub,
+  getDraftSession,
+  clearDraftSession,
+  addDraftMedia,
+  setDraftMarkdown,
+  touchDraftSession,
+  replaceDraftSession,
+} from "./draft-session.js";
 
 async function tgCall(method, token, payload) {
   const url = `https://api.telegram.org/bot${token}/${method}`;
@@ -93,7 +96,7 @@ async function sendMarkdown(chatId, markdown, token, media = []) {
   }
 }
 
-async function sendPreparedDraft(chatId, token, store, sessionKey, session, markdown) {
+async function sendPreparedDraft(chatId, token, stub, session, markdown, locale) {
   const prepared = prepareRichMarkdownMedia(markdown, session, {
     appendUnreferenced: true,
   });
@@ -120,14 +123,14 @@ async function sendPreparedDraft(chatId, token, store, sessionKey, session, mark
   }
 
   await sendMarkdown(chatId, prepared.markdown, token, prepared.media);
-  await clearMediaSession(store, sessionKey);
+  await clearDraftSession(stub);
   return true;
 }
 
 export default {
   async fetch(request, env) {
     if (request.method === "GET") {
-      return new Response("tg-md-bot: OK auto-media-v2");
+      return new Response("tg-md-bot: OK durable-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
@@ -144,8 +147,8 @@ export default {
     const chatId = message?.chat?.id;
     if (!message || !chatId) return new Response("OK");
 
-    const sessionKey = mediaSessionKey(message);
     const locale = localeFromMessage(message);
+    const draftStub = draftSessionStub(env.DRAFT_SESSIONS, message);
 
     if (isHelpCommand(message.text)) {
       const helpLocale = localeFromHelpCommand(message.text, locale);
@@ -154,7 +157,7 @@ export default {
     }
 
     if (isCommand(message.text, "media")) {
-      const session = await loadMediaSession(env.MEDIA_STORE, sessionKey);
+      const session = await getDraftSession(draftStub);
       await tgCall("sendMessage", env.BOT_TOKEN, {
         chat_id: chatId,
         text: mediaListText(session, locale),
@@ -163,10 +166,10 @@ export default {
     }
 
     if (isCommand(message.text, "clear")) {
-      await clearMediaSession(env.MEDIA_STORE, sessionKey);
+      await clearDraftSession(draftStub);
       await tgCall("sendMessage", env.BOT_TOKEN, {
         chat_id: chatId,
-        text: env.MEDIA_STORE
+        text: env.DRAFT_SESSIONS
           ? t(locale, "draftCleared")
           : t(locale, "storageMissing"),
       });
@@ -174,7 +177,7 @@ export default {
     }
 
     if (isCommand(message.text, "send")) {
-      const session = await loadMediaSession(env.MEDIA_STORE, sessionKey);
+      const session = await getDraftSession(draftStub);
       if (!session.markdown) {
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
@@ -187,10 +190,10 @@ export default {
         await sendPreparedDraft(
           chatId,
           env.BOT_TOKEN,
-          env.MEDIA_STORE,
-          sessionKey,
+          draftStub,
           session,
-          session.markdown
+          session.markdown,
+          locale
         );
       } catch (error) {
         console.error("Failed to send draft", error);
@@ -202,11 +205,11 @@ export default {
       return new Response("OK");
     }
 
-    const currentSession = await loadMediaSession(env.MEDIA_STORE, sessionKey);
+    const currentSession = await getDraftSession(draftStub);
     const incomingMedia = detectIncomingMedia(message, currentSession);
 
     if (incomingMedia) {
-      if (!env.MEDIA_STORE) {
+      if (!env.DRAFT_SESSIONS) {
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
           text: t(locale, "mediaStorageNeeded"),
@@ -214,26 +217,28 @@ export default {
         return new Response("OK");
       }
 
-      let nextSession = addMediaToSession(currentSession, incomingMedia);
-      nextSession = touchSession(nextSession, message);
+      let nextSession = await addDraftMedia(draftStub, incomingMedia);
+      nextSession = await touchDraftSession(draftStub, message);
 
       // A caption attached to a single media message is treated as Markdown
       // for that same Rich Message. Albums are accumulated and finalized with /send.
       if (message.caption?.trim()) {
-        nextSession = setPendingMarkdown(nextSession, message.caption, message);
+        nextSession = await setDraftMarkdown(
+          draftStub,
+          message.caption,
+          message
+        );
       }
-
-      await saveMediaSession(env.MEDIA_STORE, sessionKey, nextSession);
 
       if (message.caption?.trim() && !message.media_group_id) {
         try {
           await sendPreparedDraft(
             chatId,
             env.BOT_TOKEN,
-            env.MEDIA_STORE,
-            sessionKey,
+            draftStub,
             nextSession,
-            message.caption
+            message.caption,
+            locale
           );
         } catch (error) {
           console.error("Failed to send caption+media Rich Message", error);
@@ -283,9 +288,8 @@ export default {
 
     // If Telegram marks this as part of a media group, keep it as a draft and
     // let /send finalize after all separate updates have arrived.
-    if (message.media_group_id && env.MEDIA_STORE) {
-      const nextSession = setPendingMarkdown(currentSession, markdown, message);
-      await saveMediaSession(env.MEDIA_STORE, sessionKey, nextSession);
+    if (message.media_group_id && env.DRAFT_SESSIONS) {
+      await setDraftMarkdown(draftStub, markdown, message);
       return new Response("OK");
     }
 
@@ -295,10 +299,10 @@ export default {
         await sendPreparedDraft(
           chatId,
           env.BOT_TOKEN,
-          env.MEDIA_STORE,
-          sessionKey,
+          draftStub,
           currentSession,
-          markdown
+          markdown,
+          locale
         );
       } catch (error) {
         console.error("Failed to send Rich Message with auto media", error);
@@ -316,6 +320,7 @@ export default {
 };
 
 export {
+  DraftSession,
   markdownToEntities,
   splitTelegramWithEntities,
   isCommand,
