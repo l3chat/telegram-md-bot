@@ -1,4 +1,4 @@
-const SUPPORTED_LOCALES = ["ru", "en", "de", "fr"];
+const SUPPORTED_LOCALES = ["ru", "en", "de", "fr", "uk"];
 
 function normalizeLocale(value) {
   const raw = String(value || "").trim().toLowerCase().replace("_", "-");
@@ -12,7 +12,7 @@ function localeFromMessage(message) {
 
 function localeFromHelpCommand(text, fallback) {
   const match = String(text || "").trim().match(
-    /^\/(?:start|help)(?:@[A-Za-z0-9_]+)?(?:\s+(ru|en|de|fr))?\s*$/i
+    /^\/(?:start|help)(?:@[A-Za-z0-9_]+)?(?:\s+(ru|en|de|fr|uk))?\s*$/i
   );
   return match?.[1] ? normalizeLocale(match[1]) : normalizeLocale(fallback);
 }
@@ -44,7 +44,7 @@ const TEXT = {
       "",
       "Команды: `/media` — показать ожидающие медиа, `/send` — собрать текущий черновик, `/clear` — очистить черновик, `/help` — подсказка.",
       "",
-      "Другой язык: `/help en`, `/help de`, `/help fr`, `/help ru`.",
+      "Другой язык: `/help en`, `/help de`, `/help fr`, `/help uk`, `/help ru`.",
       "",
       "> Внутренние `tg://...` ссылки пользователь писать не должен — их строит бот."
     ].join("\n"),
@@ -97,7 +97,7 @@ const TEXT = {
       "",
       "Commands: `/media` — show pending media, `/send` — build the current draft, `/clear` — clear the draft, `/help` — show help.",
       "",
-      "Other languages: `/help ru`, `/help de`, `/help fr`, `/help en`.",
+      "Other languages: `/help ru`, `/help de`, `/help fr`, `/help uk`, `/help en`.",
       "",
       "> You never need to write internal `tg://...` links yourself — the bot creates them."
     ].join("\n"),
@@ -150,7 +150,7 @@ const TEXT = {
       "",
       "Befehle: `/media` — wartende Medien anzeigen, `/send` — aktuellen Entwurf erstellen, `/clear` — Entwurf löschen, `/help` — Hilfe.",
       "",
-      "Andere Sprache: `/help ru`, `/help en`, `/help fr`, `/help de`.",
+      "Andere Sprache: `/help ru`, `/help en`, `/help fr`, `/help uk`, `/help de`.",
       "",
       "> Interne `tg://...`-Links müssen nie von Hand geschrieben werden — der Bot erzeugt sie."
     ].join("\n"),
@@ -203,7 +203,7 @@ const TEXT = {
       "",
       "Commandes : `/media` — afficher les médias en attente, `/send` — construire le brouillon actuel, `/clear` — effacer le brouillon, `/help` — aide.",
       "",
-      "Autre langue : `/help ru`, `/help en`, `/help de`, `/help fr`.",
+      "Autre langue : `/help ru`, `/help en`, `/help de`, `/help uk`, `/help fr`.",
       "",
       "> Vous n’avez jamais besoin d’écrire les liens internes `tg://...` vous-même — le bot les crée."
     ].join("\n"),
@@ -229,6 +229,59 @@ const TEXT = {
     kindAudio: "Audio",
     kindVideo: "Vidéo",
     kindFile: "Fichier"
+  },
+  uk: {
+    help: [
+      "# Markdown Formatter",
+      "",
+      "Бот перетворює Markdown на **одне гарно оформлене Telegram Rich Message**.",
+      "",
+      "## Лише текст",
+      "",
+      "Надішліть Markdown прямо повідомленням або файлом `.md`, `.markdown` чи `.txt`.",
+      "",
+      "## Текст + зображення / аудіо / відео / файли",
+      "",
+      "Найпростіший спосіб:",
+      "",
+      "1. Спочатку надішліть усі медіафайли.",
+      "2. Потім надішліть Markdown-текст або файл `.md/.txt`.",
+      "3. Бот **сам створить внутрішні посилання** і збере все в одне Rich Message.",
+      "",
+      "Якщо в Markdown уже є рядок на кшталт `![](photo.jpg)`, а файл `photo.jpg` було надіслано, його буде вставлено саме в це місце. Медіа без явного посилання автоматично додаються наприкінці.",
+      "",
+      "Фото з підписом можна надіслати одним повідомленням: підпис буде використано як Markdown.",
+      "",
+      "Якщо Telegram надсилає альбом частинами, після останнього елемента використайте `/send`.",
+      "",
+      "Команди: `/media` — показати медіа, що очікують, `/send` — зібрати поточну чернетку, `/clear` — очистити чернетку, `/help` — довідка.",
+      "",
+      "Інша мова: `/help ru`, `/help en`, `/help de`, `/help fr`, `/help uk`.",
+      "",
+      "> Внутрішні посилання `tg://...` не потрібно писати вручну — бот створює їх сам."
+    ].join("\n"),
+    draftCleared: "Чернетку очищено.",
+    storageMissing: "Сховище чернеток зараз недоступне.",
+    noDraftText: "У чернетці немає тексту. Надішліть Markdown-текст або файл .md/.txt.",
+    draftSendFailed: "Не вдалося зібрати Rich Message з поточної чернетки.",
+    mediaStorageNeeded: "Тимчасове сховище чернеток зараз недоступне.",
+    captionMediaFailed: "Не вдалося зібрати Rich Message з підпису та медіа.",
+    albumHint: "Це частина альбому. Після останнього елемента надішліть /send або Markdown-текст.",
+    textDocumentExpected: "Текстовий документ має бути .md, .markdown або .txt. Інші файли бот сприймає як вкладення.",
+    textDocumentReadFailed: "Не вдалося прочитати текстовий файл. Використовуйте UTF-8 .md/.markdown/.txt.",
+    tooManyMedia: "В одному Rich Message можна використати не більше 50 медіавкладень.",
+    missingMediaHeader: "Не знайдено медіа:",
+    missingMediaFooter: "Надішліть ці файли боту або видаліть відповідні посилання з Markdown.",
+    autoMediaFailed: "Не вдалося зібрати Rich Message з надісланими медіа.",
+    mediaReceived: "отримано. Тепер надішліть Markdown-текст або файл .md/.txt. Посилання вручну писати не потрібно — бот додасть медіа автоматично.",
+    pendingNone: "Зображень, аудіо чи файлів, що очікують, зараз немає.",
+    pendingTitle: "Медіа, що очікують:",
+    pendingFooter: "Якщо Markdown містить ім’я файлу, медіа буде вставлено у вказане місце. Решту файлів бот автоматично додасть наприкінці.",
+    kindPhoto: "Фото",
+    kindVoice: "Голосове повідомлення",
+    kindAudio: "Аудіо",
+    kindVideo: "Відео",
+    kindFile: "Файл"
   }
 };
 
