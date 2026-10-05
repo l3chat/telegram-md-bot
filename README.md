@@ -205,6 +205,52 @@ The returned `url` must match your Worker URL.
 
 ---
 
+
+## 🖼 Images and audio inside one Rich Message
+
+The bot can also assemble Markdown together with Telegram-hosted media into a single Rich Message.
+
+Workflow:
+
+1. Send a photo to the bot as a Telegram photo, or send an audio file / voice note.
+2. The bot stores the Telegram `file_id` for 24 hours and replies with an alias such as `photo_1` or the audio filename.
+3. Reference that alias from Markdown on its own line:
+
+```md
+# Trip notes
+
+Here is the map:
+
+![](photo_1 "Map")
+
+And here is the recording:
+
+![](lesson.mp3 "Audio note")
+```
+
+4. Send the Markdown text or `.md` file. The bot rewrites the local aliases to `tg://photo?id=...` / `tg://audio?id=...` and passes the matching media list to `sendRichMessage`.
+
+Commands:
+
+- `/media` — list currently stored media aliases
+- `/clear` — clear stored media
+- `/help` — show the usage guide
+
+Media aliases are stored for 24 hours. Rich Messages support up to 50 media elements.
+
+### Cloudflare KV binding
+
+Media sessions require one Workers KV namespace bound as:
+
+```text
+MEDIA_STORE
+```
+
+Create a KV namespace in Cloudflare, then add it to the `tg-md-bot` Worker under **Settings → Bindings → KV Namespace Bindings** with variable name `MEDIA_STORE`.
+
+The bot continues to format plain Markdown even if this binding is not configured; only uploaded local media depends on it.
+
+
 ## 📝 Example
 
 Input:
