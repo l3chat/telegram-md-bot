@@ -2,23 +2,45 @@ import {
   markdownToEntities,
   splitTelegramWithEntities,
 } from "./format.js";
+import {
+  mediaSessionKey,
+  detectIncomingMedia,
+  addMediaToSession,
+  prepareRichMarkdownMedia,
+  loadMediaSession,
+  saveMediaSession,
+  clearMediaSession,
+  mediaStoredText,
+  mediaListText,
+} from "./media.js";
 
-const HELP_MARKDOWN = `# Markdown Formatter
-
-Бот превращает Markdown в **одно красиво оформленное сообщение Telegram**.
-
-## Как пользоваться
-
-1. **Короткий текст** — пришлите Markdown прямо сообщением.
-2. **Длинный текст** — лучше пришлите файл `.md`, `.markdown` или `.txt` в UTF-8.
-3. Бот вернёт готовое форматированное сообщение.
-4. **Перешлите его в нужный чат** — так форматирование сохраняется надёжнее всего.
-
-Поддерживаются заголовки, **жирный текст**, *курсив*, списки, цитаты, ссылки, код и таблицы.
-
-> Подсказка: обычное сообщение Telegram ограничено по длине, поэтому для больших документов удобнее отправлять боту Markdown-файл.
-
-Команда `/help` показывает эту подсказку снова.`;
+const HELP_MARKDOWN = [
+  "# Markdown Formatter",
+  "",
+  "Бот превращает Markdown в **одно красиво оформленное Rich Message**.",
+  "",
+  "## Обычный текст",
+  "",
+  "1. Пришлите Markdown прямо сообщением или файлом `.md`, `.markdown` или `.txt`.",
+  "2. Бот вернёт готовое форматированное сообщение.",
+  "3. Перешлите его в нужный чат.",
+  "",
+  "## Текст с картинками и аудио",
+  "",
+  "1. Сначала пришлите боту картинку как **Фото**, аудиофайл как **Аудио** или голосовое сообщение.",
+  "2. Бот выдаст короткое имя, например `photo_1` или имя аудиофайла.",
+  "3. В Markdown вставьте медиа отдельной строкой:",
+  "",
+  '`![](photo_1 "Подпись")`',
+  "",
+  "4. Пришлите Markdown — бот соберёт текст и медиа в **одно Rich Message**.",
+  "",
+  "Если у фотографии есть короткая подпись без пробелов, она будет использована как имя. Например подпись `schema.png` позволяет писать `![](schema.png)`.",
+  "",
+  "Команды: `/media` — список сохранённых медиа, `/clear` — очистить список, `/help` — эта подсказка.",
+  "",
+  "> Медиа хранятся 24 часа. Один Rich Message поддерживает до 50 медиа-вложений.",
+].join("\n");
 
 // Make a Telegram Bot API call.
 // Throws if Telegram returns ok: false, so upstream can log/fail.
@@ -34,8 +56,20 @@ async function tgCall(method, token, payload) {
   return data;
 }
 
+function isCommand(text, names) {
+  const list = Array.isArray(names) ? names : [names];
+  const escaped = list.map((name) =>
+    String(name).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  );
+  const pattern = new RegExp(
+    "^\\/(" + escaped.join("|") + ")(?:@[A-Za-z0-9_]+)?(?:\\s|$)",
+    "i"
+  );
+  return pattern.test(text || "");
+}
+
 function isHelpCommand(text) {
-  return /^\/(start|help)(?:@[A-Za-z0-9_]+)?(?:\s|$)/i.test(text || "");
+  return isCommand(text, ["start", "help"]);
 }
 
 function isMarkdownDocument(document) {
@@ -60,20 +94,17 @@ async function downloadTelegramDocument(token, document) {
   return r.text();
 }
 
-async function sendMarkdown(chatId, markdown, token) {
+async function sendMarkdown(chatId, markdown, token, media = []) {
   if (!markdown?.trim()) return;
 
-  // Rich Messages (Bot API 10.1+) accept Rich Markdown directly and allow
-  // substantially longer, structured messages than sendMessage.
   try {
     await tgCall("sendRichMessage", token, {
       chat_id: chatId,
-      rich_message: { markdown },
+      rich_message: media.length > 0 ? { markdown, media } : { markdown },
     });
     return;
   } catch (error) {
-    // Keep the previous formatter/splitter as a compatibility fallback for
-    // unsupported Markdown constructs or content above Rich Message limits.
+    if (media.length > 0) throw error;
     console.warn("sendRichMessage failed; falling back to sendMessage", error);
   }
 
@@ -92,14 +123,12 @@ async function sendMarkdown(chatId, markdown, token) {
 
 export default {
   async fetch(request, env) {
-    // For quick health-check in browser
     if (request.method === "GET") {
-      return new Response("tg-md-bot: OK help-v1");
+      return new Response("tg-md-bot: OK media-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
 
-    // Verify Telegram webhook secret.
     if (env.WEBHOOK_SECRET) {
       const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
       if (!secret || secret !== env.WEBHOOK_SECRET) {
@@ -112,20 +141,63 @@ export default {
     const chatId = message?.chat?.id;
     if (!message || !chatId) return new Response("OK");
 
+    const sessionKey = mediaSessionKey(message);
+
     if (isHelpCommand(message.text)) {
       await sendMarkdown(chatId, HELP_MARKDOWN, env.BOT_TOKEN);
       return new Response("OK");
     }
 
+    if (isCommand(message.text, "media")) {
+      const session = await loadMediaSession(env.MEDIA_STORE, sessionKey);
+      await tgCall("sendMessage", env.BOT_TOKEN, {
+        chat_id: chatId,
+        text: mediaListText(session),
+      });
+      return new Response("OK");
+    }
+
+    if (isCommand(message.text, "clear")) {
+      await clearMediaSession(env.MEDIA_STORE, sessionKey);
+      await tgCall("sendMessage", env.BOT_TOKEN, {
+        chat_id: chatId,
+        text: env.MEDIA_STORE
+          ? "Список сохранённых картинок и аудио очищен."
+          : "Хранилище медиа пока не подключено.",
+      });
+      return new Response("OK");
+    }
+
+    const currentSession = await loadMediaSession(env.MEDIA_STORE, sessionKey);
+    const incomingMedia = detectIncomingMedia(message, currentSession);
+
+    if (incomingMedia) {
+      if (!env.MEDIA_STORE) {
+        await tgCall("sendMessage", env.BOT_TOKEN, {
+          chat_id: chatId,
+          text:
+            "Поддержка картинок и аудио уже есть в коде, но для неё нужно один раз подключить Cloudflare KV binding MEDIA_STORE. Обычный Markdown продолжает работать.",
+        });
+        return new Response("OK");
+      }
+
+      const nextSession = addMediaToSession(currentSession, incomingMedia);
+      await saveMediaSession(env.MEDIA_STORE, sessionKey, nextSession);
+      await tgCall("sendMessage", env.BOT_TOKEN, {
+        chat_id: chatId,
+        text: mediaStoredText(incomingMedia),
+      });
+      return new Response("OK");
+    }
+
     let markdown = message.text;
 
-    // Long Markdown cannot be pasted into one ordinary Telegram message,
-    // so accept .md/.markdown/.txt documents as input as well.
     if (!markdown && message.document) {
       if (!isMarkdownDocument(message.document)) {
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text: "Пришлите Markdown-текст или файл .md, .markdown или .txt.",
+          text:
+            "Для форматирования пришлите Markdown-текст или файл .md/.markdown/.txt. Картинку отправляйте как Фото, аудио — как Аудио или голосовое сообщение.",
         });
         return new Response("OK");
       }
@@ -136,7 +208,8 @@ export default {
         console.error("Failed to read uploaded document", error);
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text: "Не удалось прочитать файл. Попробуйте ещё раз с UTF-8 файлом .md или .txt.",
+          text:
+            "Не удалось прочитать файл. Попробуйте ещё раз с UTF-8 файлом .md или .txt.",
         });
         return new Response("OK");
       }
@@ -144,7 +217,44 @@ export default {
 
     if (!markdown) return new Response("OK");
 
-    await sendMarkdown(chatId, markdown, env.BOT_TOKEN);
+    const session = await loadMediaSession(env.MEDIA_STORE, sessionKey);
+    const prepared = prepareRichMarkdownMedia(markdown, session);
+
+    if (prepared.tooMany) {
+      await tgCall("sendMessage", env.BOT_TOKEN, {
+        chat_id: chatId,
+        text: "В одном Rich Message можно использовать не более 50 медиа-вложений.",
+      });
+      return new Response("OK");
+    }
+
+    if (prepared.missing.length > 0) {
+      await tgCall("sendMessage", env.BOT_TOKEN, {
+        chat_id: chatId,
+        text:
+          "Не найдены медиа:\n\n" +
+          prepared.missing.map((name) => "• " + name).join("\n") +
+          "\n\nСначала пришлите эти картинки/аудио боту или используйте публичный https:// URL. Команда /media покажет уже сохранённые имена.",
+      });
+      return new Response("OK");
+    }
+
+    try {
+      await sendMarkdown(
+        chatId,
+        prepared.markdown,
+        env.BOT_TOKEN,
+        prepared.media
+      );
+    } catch (error) {
+      console.error("Failed to send rich message with media", error);
+      await tgCall("sendMessage", env.BOT_TOKEN, {
+        chat_id: chatId,
+        text:
+          "Не удалось собрать Rich Message с медиа. Проверьте, что картинка была отправлена как Фото, а звук — как Аудио или голосовое сообщение.",
+      });
+    }
+
     return new Response("OK");
   },
 };
@@ -154,6 +264,7 @@ export {
   HELP_MARKDOWN,
   markdownToEntities,
   splitTelegramWithEntities,
+  isCommand,
   isHelpCommand,
   isMarkdownDocument,
   sendMarkdown,
