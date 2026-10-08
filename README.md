@@ -192,6 +192,14 @@ Current Durable Object build returns:
 tg-md-bot: OK durable-v1
 ```
 
+## Demo document
+
+A full manual demo / regression test is available in:
+
+- `RICH_MESSAGE_DEMO.md`
+
+It exercises headings, lists, task lists, quotes, tables, code, links, formulas and media placement.
+
 ## Testing
 
 Run:
