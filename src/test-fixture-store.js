@@ -1,4 +1,4 @@
-const FIXTURE_VERSION = "v1";
+const FIXTURE_VERSION = "v2";
 
 const FIXTURE_URLS = {
   photo: "https://raw.githubusercontent.com/l3chat/telegram-md-bot/main/test-media/images/184273.png",
@@ -14,6 +14,46 @@ async function callTelegram(method, token, payload) {
   });
   const data = await response.json();
   if (!data.ok) throw new Error(method + " failed: " + JSON.stringify(data));
+  return data.result;
+}
+
+async function fetchFixture(url) {
+  const response = await fetch(url, {
+    headers: { "user-agent": "tg-md-bot-test-fixtures" },
+  });
+  if (!response.ok) {
+    throw new Error("Fixture download failed: HTTP " + response.status + " " + url);
+  }
+  return response.arrayBuffer();
+}
+
+async function uploadTelegramFile(
+  method,
+  token,
+  chatId,
+  fieldName,
+  fileName,
+  mimeType,
+  sourceUrl,
+  extra = {}
+) {
+  const bytes = await fetchFixture(sourceUrl);
+  const form = new FormData();
+  form.set("chat_id", String(chatId));
+  form.set(fieldName, new Blob([bytes], { type: mimeType }), fileName);
+
+  for (const [key, value] of Object.entries(extra)) {
+    form.set(key, String(value));
+  }
+
+  const response = await fetch(
+    "https://api.telegram.org/bot" + token + "/" + method,
+    { method: "POST", body: form }
+  );
+  const data = await response.json();
+  if (!data.ok) {
+    throw new Error(method + " upload failed: " + JSON.stringify(data));
+  }
   return data.result;
 }
 
@@ -37,24 +77,54 @@ async function registerFixture(token, chatId, method, payload, readFileId) {
 }
 
 async function registerFixtures(token, chatId) {
-  const photo = await registerFixture(
-    token, chatId, "sendPhoto",
-    { photo: FIXTURE_URLS.photo },
-    (result) => {
-      const sizes = result.photo || [];
-      return sizes.length ? sizes[sizes.length - 1].file_id : null;
+  const photoMessage = await uploadTelegramFile(
+    "sendPhoto",
+    token,
+    chatId,
+    "photo",
+    "184273.png",
+    "image/png",
+    FIXTURE_URLS.photo
+  );
+  const photoSizes = photoMessage.photo || [];
+  const photo = photoSizes.length
+    ? photoSizes[photoSizes.length - 1].file_id
+    : null;
+  await quietlyDelete(token, chatId, photoMessage.message_id);
+
+  const audioMessage = await uploadTelegramFile(
+    "sendAudio",
+    token,
+    chatId,
+    "audio",
+    "ding-dong-01.mp3",
+    "audio/mpeg",
+    FIXTURE_URLS.audio,
+    {
+      title: "Ding Dong Test",
+      performer: "Markdown to Rich Message",
     }
   );
-  const audio = await registerFixture(
-    token, chatId, "sendAudio",
-    { audio: FIXTURE_URLS.audio, title: "Ding Dong Test", performer: "Markdown Formatter" },
-    (result) => result.audio?.file_id
+  const audio = audioMessage.audio?.file_id;
+  await quietlyDelete(token, chatId, audioMessage.message_id);
+
+  const videoMessage = await uploadTelegramFile(
+    "sendVideo",
+    token,
+    chatId,
+    "video",
+    "numbers-01.mp4",
+    "video/mp4",
+    FIXTURE_URLS.video,
+    { supports_streaming: true }
   );
-  const video = await registerFixture(
-    token, chatId, "sendVideo",
-    { video: FIXTURE_URLS.video, supports_streaming: true },
-    (result) => result.video?.file_id
-  );
+  const video = videoMessage.video?.file_id;
+  await quietlyDelete(token, chatId, videoMessage.message_id);
+
+  if (!photo || !audio || !video) {
+    throw new Error("Telegram did not return reusable file_id for all test fixtures");
+  }
+
   return { version: FIXTURE_VERSION, photo, audio, video };
 }
 
