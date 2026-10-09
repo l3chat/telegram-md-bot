@@ -30,7 +30,6 @@ import {
   splitRichMessage,
 } from "./rich-split.js";
 import {
-  ensureBotProfile,
   syncBotProfile,
 } from "./bot-profile.js";
 import {
@@ -344,14 +343,6 @@ export default {
       if (!secret || secret !== env.WEBHOOK_SECRET) {
         return new Response("Forbidden", { status: 403 });
       }
-    }
-
-    if (ctx?.waitUntil) {
-      ctx.waitUntil(
-        ensureBotProfile(env.BOT_TOKEN).catch((error) => {
-          console.error("Failed to sync Telegram public profile", error);
-        })
-      );
     }
 
     const update = await request.json();
