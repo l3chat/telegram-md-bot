@@ -153,8 +153,13 @@ function isHeavyUpdate(message) {
 
 async function consumeLimiter(binding, key) {
   if (!binding?.limit) return true;
-  const result = await binding.limit({ key });
-  return Boolean(result?.success);
+  try {
+    const result = await binding.limit({ key });
+    return Boolean(result?.success);
+  } catch (error) {
+    console.error("Rate limiter error", error);
+    return true;
+  }
 }
 
 async function notifyRateLimited(env, chatId, locale, key, messageKey) {
@@ -327,7 +332,7 @@ export default {
         }
       }
 
-      return new Response("tg-md-bot: OK webhook-diag-v1");
+      return new Response("tg-md-bot: OK recovery-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
@@ -351,6 +356,18 @@ export default {
     const message = update.message;
     const chatId = message?.chat?.id;
     if (!message || !chatId) return new Response("OK");
+
+    if (isCommand(message.text, "ping")) {
+      try {
+        await tgCall("sendMessage", env.BOT_TOKEN, {
+          chat_id: chatId,
+          text: "pong",
+        });
+      } catch (error) {
+        console.error("Ping failed", error);
+      }
+      return new Response("OK");
+    }
 
     const locale = localeFromMessage(message);
     const draftStub = draftSessionStub(env.DRAFT_SESSIONS, message);
