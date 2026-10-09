@@ -79,6 +79,7 @@ A single photo can be sent together with a Markdown caption. The bot uses the ca
 - `/send` — build the current draft
 - `/clear` — discard the current draft
 - `/privacy` — show the localized privacy notice and public privacy-page link
+- `/stats` — show DAU, 7-day users, MAU, updates, Rich Messages, media and errors
 - `/test` — print the localized Rich Message Test Page directly in the bot chat
 
 The bot automatically chooses the UI language from Telegram's `language_code`; unsupported languages fall back to English.
@@ -357,3 +358,18 @@ The production Worker exposes two health endpoints:
 - `/health/webhook` — last minimal webhook-response diagnostic event.
 
 The diagnostic record intentionally excludes message text, file contents, and personal identifiers.
+
+
+## Usage statistics
+
+The `/stats` command reports activity counted from the moment this feature was deployed:
+
+- DAU (last 24 hours);
+- active users over 7 days;
+- MAU (last 30 days);
+- incoming updates;
+- successfully sent Rich Messages;
+- media events;
+- errors.
+
+Active-user tracking is privacy-preserving and retained for at most 30 days. Message text and file contents are not included in statistics.
