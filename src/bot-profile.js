@@ -101,7 +101,7 @@ export {
 };
 
 
-async function telegramApiCall(method, token, payload) {
+async function telegramApiCall(method, token, payload, context = {}) {
   const response = await fetch(
     "https://api.telegram.org/bot" + token + "/" + method,
     {
@@ -112,7 +112,18 @@ async function telegramApiCall(method, token, payload) {
   );
   const data = await response.json();
   if (!data.ok) {
-    throw new Error(method + " failed: " + JSON.stringify(data));
+    const locale = context.locale ? " locale=" + context.locale : "";
+    const language = payload?.language_code
+      ? " language_code=" + payload.language_code
+      : " default-language";
+    throw new Error(
+      method +
+        " failed" +
+        locale +
+        language +
+        ": " +
+        (data.description || JSON.stringify(data))
+    );
   }
   return data;
 }
@@ -132,22 +143,26 @@ async function syncBotProfile(token) {
     await telegramApiCall(
       "setMyCommands",
       token,
-      withLanguage({ commands: config.commands })
+      withLanguage({ commands: config.commands }),
+      { locale }
     );
     await telegramApiCall(
       "setMyName",
       token,
-      withLanguage({ name: config.name })
+      withLanguage({ name: config.name }),
+      { locale }
     );
     await telegramApiCall(
       "setMyShortDescription",
       token,
-      withLanguage({ short_description: config.shortDescription })
+      withLanguage({ short_description: config.shortDescription }),
+      { locale }
     );
     await telegramApiCall(
       "setMyDescription",
       token,
-      withLanguage({ description: config.description })
+      withLanguage({ description: config.description }),
+      { locale }
     );
   };
 
