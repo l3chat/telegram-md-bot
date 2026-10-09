@@ -4,6 +4,8 @@ A public Telegram bot that turns Markdown into a **single Telegram Rich Message*
 
 Live bot: **@tgMdFormatter_bot**
 
+Built with **GPT-6.1** · Source: https://github.com/l3chat/telegram-md-bot
+
 ## Features
 
 - Markdown → Telegram Rich Message
@@ -73,6 +75,7 @@ A single photo can be sent together with a Markdown caption. The bot uses the ca
 - `/send` — build the current draft
 - `/clear` — discard the current draft
 - `/privacy` — show the localized privacy notice and public privacy-page link
+- `/test` — print the localized Rich Message Test Page directly in the bot chat
 
 The bot automatically chooses the UI language from Telegram's `language_code`; unsupported languages fall back to English.
 
@@ -218,7 +221,7 @@ Open the Worker URL in a browser.
 Current build returns:
 
 ```text
-tg-md-bot: OK public-v1
+tg-md-bot: OK test-page-v1
 ```
 
 ## Demo document
