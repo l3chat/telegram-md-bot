@@ -5,6 +5,7 @@ import {
   touchSession,
 } from "./media.js";
 import { finalizeAlbumDraft } from "./album-finalizer.js";
+import { trackStat } from "./stats-store.js";
 
 const TTL_MS = 24 * 60 * 60 * 1000;
 const ALBUM_QUIET_MS = 2000;
@@ -65,10 +66,7 @@ export class DraftSession {
           return;
         } catch (error) {
           console.error("Automatic album finalize failed", error);
-          try {
-            const mod = await import("./stats-store.js");
-            await mod.trackStat(this.env.STATS, "errors");
-          } catch {}
+          await trackStat(this.env.STATS, "errors");
           await this.state.storage.put("album_error", {
             message: String(error?.message || error).slice(0, 1200),
             at: new Date().toISOString(),
