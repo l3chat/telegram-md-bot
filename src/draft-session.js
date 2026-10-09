@@ -60,7 +60,8 @@ export class DraftSession {
             this.env.BOT_TOKEN,
             pending.chat_id,
             session,
-            this.env.STATS
+            this.env.STATS,
+            pending.user_id || null
           );
           await this.state.storage.deleteAll();
           return;
