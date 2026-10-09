@@ -17,6 +17,13 @@ function localeFromHelpCommand(text, fallback) {
   return match?.[1] ? normalizeLocale(match[1]) : normalizeLocale(fallback);
 }
 
+function localeFromTestCommand(text, fallback) {
+  const match = String(text || "").trim().match(
+    /^\/test(?:@[A-Za-z0-9_]+)?(?:\s+(ru|en|de|fr|uk))?\s*$/i
+  );
+  return match?.[1] ? normalizeLocale(match[1]) : normalizeLocale(fallback);
+}
+
 const TEXT = {
   ru: {
     help: [
@@ -42,7 +49,7 @@ const TEXT = {
       "",
       "Если Telegram отправляет альбом частями, после последнего элемента используйте `/send`.",
       "",
-      "Команды: `/test` — тестовая страница, `/media` — показать ожидающие медиа, `/send` — собрать текущий черновик, `/clear` — очистить черновик, `/privacy` — конфиденциальность, `/help` — подсказка.",
+      "Команды: `/test [ru|en|de|fr|uk]` — тестовая страница на выбранном языке, `/media` — показать ожидающие медиа, `/send` — собрать текущий черновик, `/clear` — очистить черновик, `/privacy` — конфиденциальность, `/help` — подсказка.",
       "",
       "Другой язык: `/help en`, `/help de`, `/help fr`, `/help uk`, `/help ru`.",
       "",
@@ -104,7 +111,7 @@ const TEXT = {
       "",
       "If Telegram sends an album as separate updates, use `/send` after the last item.",
       "",
-      "Commands: `/test` — Test Page, `/media` — show pending media, `/send` — build the current draft, `/clear` — clear the draft, `/privacy` — privacy, `/help` — show help.",
+      "Commands: `/test [ru|en|de|fr|uk]` — Test Page in the selected language, `/media` — show pending media, `/send` — build the current draft, `/clear` — clear the draft, `/privacy` — privacy, `/help` — show help.",
       "",
       "Other languages: `/help ru`, `/help de`, `/help fr`, `/help uk`, `/help en`.",
       "",
@@ -166,7 +173,7 @@ const TEXT = {
       "",
       "Wenn Telegram ein Album in mehreren Updates liefert, nach dem letzten Element `/send` senden.",
       "",
-      "Befehle: `/test` — Testseite, `/media` — wartende Medien anzeigen, `/send` — aktuellen Entwurf erstellen, `/clear` — Entwurf löschen, `/privacy` — Datenschutz, `/help` — Hilfe.",
+      "Befehle: `/test [ru|en|de|fr|uk]` — Testseite in der gewählten Sprache, `/media` — wartende Medien anzeigen, `/send` — aktuellen Entwurf erstellen, `/clear` — Entwurf löschen, `/privacy` — Datenschutz, `/help` — Hilfe.",
       "",
       "Andere Sprache: `/help ru`, `/help en`, `/help fr`, `/help uk`, `/help de`.",
       "",
@@ -228,7 +235,7 @@ const TEXT = {
       "",
       "Si Telegram envoie un album en plusieurs mises à jour, utilisez `/send` après le dernier élément.",
       "",
-      "Commandes : `/test` — page de test, `/media` — afficher les médias en attente, `/send` — construire le brouillon actuel, `/clear` — effacer le brouillon, `/privacy` — confidentialité, `/help` — aide.",
+      "Commandes : `/test [ru|en|de|fr|uk]` — page de test dans la langue choisie, `/media` — afficher les médias en attente, `/send` — construire le brouillon actuel, `/clear` — effacer le brouillon, `/privacy` — confidentialité, `/help` — aide.",
       "",
       "Autre langue : `/help ru`, `/help en`, `/help de`, `/help uk`, `/help fr`.",
       "",
@@ -290,7 +297,7 @@ const TEXT = {
       "",
       "Якщо Telegram надсилає альбом частинами, після останнього елемента використайте `/send`.",
       "",
-      "Команди: `/test` — тестова сторінка, `/media` — показати медіа, що очікують, `/send` — зібрати поточну чернетку, `/clear` — очистити чернетку, `/privacy` — конфіденційність, `/help` — довідка.",
+      "Команди: `/test [ru|en|de|fr|uk]` — тестова сторінка вибраною мовою, `/media` — показати медіа, що очікують, `/send` — зібрати поточну чернетку, `/clear` — очистити чернетку, `/privacy` — конфіденційність, `/help` — довідка.",
       "",
       "Інша мова: `/help ru`, `/help en`, `/help de`, `/help fr`, `/help uk`.",
       "",
@@ -344,6 +351,7 @@ export {
   normalizeLocale,
   localeFromMessage,
   localeFromHelpCommand,
+  localeFromTestCommand,
   t,
   helpMarkdown,
 };
