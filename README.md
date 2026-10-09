@@ -79,7 +79,8 @@ A single photo can be sent together with a Markdown caption. The bot uses the ca
 - `/send` — build the current draft
 - `/clear` — discard the current draft
 - `/privacy` — show the localized privacy notice and public privacy-page link
-- `/stats` — show DAU, 7-day users, MAU, updates, Rich Messages, media and errors
+- `/stats` — show DAU, 7-day users, MAU, updates, Rich Messages, media, errors and referral sources
+- `/share` — get a tracked share link
 - `/test` — print the localized Rich Message Test Page directly in the bot chat
 
 The bot automatically chooses the UI language from Telegram's `language_code`; unsupported languages fall back to English.
@@ -373,3 +374,36 @@ The `/stats` command reports activity counted from the moment this feature was d
 - errors.
 
 Active-user tracking is privacy-preserving and retained for at most 30 days. Message text and file contents are not included in statistics.
+
+
+## Public landing page
+
+The Worker serves a localized landing page at:
+
+```text
+https://tg-md-bot.lechat-reg.workers.dev/
+```
+
+Available languages: `?lang=en|ru|de|fr|uk`.
+
+The main call-to-action uses a Telegram deep link with `start=website`, so website referrals can be measured without cookies or third-party analytics.
+
+## Referral tracking
+
+Telegram `/start` payloads are used for lightweight source attribution.
+
+Examples:
+
+```text
+https://t.me/tgMdFormatter_bot?start=website
+https://t.me/tgMdFormatter_bot?start=share
+https://t.me/tgMdFormatter_bot?start=github
+https://t.me/tgMdFormatter_bot?start=reddit
+```
+
+The first recorded source is retained with the privacy-preserving active-user record. `/stats` shows, per source:
+
+- active referred users in the 30-day window;
+- how many of them have successfully created at least one Rich Message.
+
+No cookies, browser fingerprinting, message contents, or raw Telegram user IDs are used for attribution.
