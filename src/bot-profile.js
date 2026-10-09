@@ -1,15 +1,15 @@
-const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v2";
+const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v3";
 
 const DEFAULT_LOCALE = "en";
 const PUBLIC_LOCALES = ["en", "ru", "de", "fr", "uk"];
 
 const PROFILE = {
   en: {
-    name: "Markdown Formatter",
+    name: "Markdown → Rich Message",
     shortDescription:
-      "Turn Markdown, images and audio into Rich Messages. Built with GPT-6.1.",
+      "Telegram Markdown & Media Converter — Markdown → Rich Messages. Built with GPT-6.1.",
     description:
-      "Convert Markdown text or files into Telegram Rich Messages. Add photos, audio, video and documents; media are linked automatically and long documents are split safely. Built with GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Telegram Markdown & Media Converter for text, .md files, photos, audio, video and documents. Media are linked automatically and long documents are split safely. Built with GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "How to use the bot" },
       { command: "test", description: "Show the Rich Message Test Page" },
@@ -20,11 +20,11 @@ const PROFILE = {
     ],
   },
   ru: {
-    name: "Форматтер Markdown",
+    name: "Markdown → Rich Message",
     shortDescription:
-      "Markdown, изображения и аудио → Rich Messages. Сделано с GPT-6.1.",
+      "Telegram Markdown & Media Converter — Markdown и медиа → Rich Messages. GPT-6.1.",
     description:
-      "Преобразует Markdown и медиа в Telegram Rich Messages, автоматически связывает файлы и разбивает длинные документы. Сделано с помощью GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Telegram Markdown & Media Converter: Markdown, .md-файлы, фото, аудио, видео и документы превращаются в Telegram Rich Messages. Сделано с помощью GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Как пользоваться ботом" },
       { command: "test", description: "Показать тестовую Rich Message страницу" },
@@ -35,11 +35,11 @@ const PROFILE = {
     ],
   },
   de: {
-    name: "Markdown-Formatierer",
+    name: "Markdown → Rich Message",
     shortDescription:
-      "Markdown, Bilder und Audio → Rich Messages. Erstellt mit GPT-6.1.",
+      "Telegram Markdown & Media Converter — Markdown und Medien → Rich Messages. GPT-6.1.",
     description:
-      "Wandelt Markdown und Medien in Telegram Rich Messages um, verknüpft Dateien automatisch und teilt lange Dokumente sicher auf. Erstellt mit GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Telegram Markdown & Media Converter für Markdown, .md-Dateien, Fotos, Audio, Video und Dokumente. Medien werden automatisch verknüpft. Erstellt mit GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Hilfe zur Benutzung" },
       { command: "test", description: "Rich-Message-Testseite anzeigen" },
@@ -50,11 +50,11 @@ const PROFILE = {
     ],
   },
   fr: {
-    name: "Formateur Markdown",
+    name: "Markdown → Rich Message",
     shortDescription:
-      "Markdown, images et audio → Rich Messages. Créé avec GPT-6.1.",
+      "Telegram Markdown & Media Converter — Markdown et médias → Rich Messages. GPT-6.1.",
     description:
-      "Transforme Markdown et les médias en Rich Messages Telegram, relie les fichiers automatiquement et découpe les longs documents. Créé avec GPT-6.1. GitHub : https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Telegram Markdown & Media Converter pour Markdown, fichiers .md, photos, audio, vidéo et documents. Les médias sont liés automatiquement. Créé avec GPT-6.1. GitHub : https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Mode d’emploi du bot" },
       { command: "test", description: "Afficher la page de test Rich Message" },
@@ -65,11 +65,11 @@ const PROFILE = {
     ],
   },
   uk: {
-    name: "Форматувач Markdown",
+    name: "Markdown → Rich Message",
     shortDescription:
-      "Markdown, зображення й аудіо → Rich Messages. Створено з GPT-6.1.",
+      "Telegram Markdown & Media Converter — Markdown і медіа → Rich Messages. GPT-6.1.",
     description:
-      "Перетворює Markdown і медіа на Telegram Rich Messages, автоматично пов’язує файли та ділить довгі документи. Створено за допомогою GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Telegram Markdown & Media Converter для Markdown, .md-файлів, фото, аудіо, відео та документів. Медіа прив’язуються автоматично. Створено за допомогою GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Як користуватися ботом" },
       { command: "test", description: "Показати тестову сторінку Rich Message" },
