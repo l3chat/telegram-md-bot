@@ -17,8 +17,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          URL="https://tg-md-bot.lechat-reg.workers.dev"
-          EXPECTED="tg-md-bot: OK stats-v1"
+          URL="https://tg-md-bot.lechat-reg.workers.dev/health"
+          EXPECTED="tg-md-bot: OK promotion-v1"
 
           for i in $(seq 1 36); do
             BODY="$(curl -fsS --max-time 10 "$URL" || true)"
@@ -68,3 +68,13 @@ jobs:
         run: |
           set -euo pipefail
           curl -fsS --max-time 15 "https://tg-md-bot.lechat-reg.workers.dev/health/webhook" >/dev/null
+
+
+      - name: Check public landing page
+        shell: bash
+        run: |
+          set -euo pipefail
+          PAGE="$(curl -fsS --max-time 15 "https://tg-md-bot.lechat-reg.workers.dev/?lang=en")"
+          echo "$PAGE" | grep -q "Markdown"
+          echo "$PAGE" | grep -q "tgMdFormatter_bot?start=website"
+          echo "$PAGE" | grep -q "github.com/l3chat/telegram-md-bot"
