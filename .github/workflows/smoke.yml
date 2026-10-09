@@ -18,7 +18,7 @@ jobs:
         run: |
           set -euo pipefail
           URL="https://tg-md-bot.lechat-reg.workers.dev"
-          EXPECTED="tg-md-bot: OK webhook-diag-v1"
+          EXPECTED="tg-md-bot: OK recovery-v1"
 
           for i in $(seq 1 36); do
             BODY="$(curl -fsS --max-time 10 "$URL" || true)"
