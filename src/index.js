@@ -347,7 +347,7 @@ export default {
         }
       }
 
-      return new Response("tg-md-bot: OK album-auto-v1");
+      return new Response("tg-md-bot: OK stats-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
@@ -468,9 +468,9 @@ export default {
     if (isHelpCommand(message.text)) {
       const helpLocale = localeFromHelpCommand(message.text, locale);
       try {
-        await sendMarkdown(chatId, helpMarkdown(helpLocale), env.BOT_TOKEN);
+        await sendMarkdown(chatId, helpMarkdown(helpLocale), env.BOT_TOKEN, [], env.STATS);
       } catch (error) {
-        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
       }
       return new Response("OK");
     }
@@ -487,7 +487,7 @@ export default {
           env.STATS
         );
       } catch (error) {
-        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
       }
       return new Response("OK");
     }
@@ -507,10 +507,11 @@ export default {
             { id: "test_photo", media: { type: "photo", media: fixtures.photo } },
             { id: "test_audio", media: { type: "audio", media: fixtures.audio } },
             { id: "test_video", media: { type: "video", media: fixtures.video } },
-          ]
+          ],
+          env.STATS
         );
       } catch (error) {
-        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
       }
       return new Response("OK");
     }
@@ -552,10 +553,11 @@ export default {
           draftStub,
           session,
           session.markdown,
-          locale
+          locale,
+          env.STATS
         );
       } catch (error) {
-        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
       }
       return new Response("OK");
     }
@@ -607,10 +609,11 @@ export default {
             draftStub,
             nextSession,
             message.caption,
-            locale
+            locale,
+            env.STATS
           );
         } catch (error) {
-          await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+          await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
         }
         return new Response("OK");
       }
@@ -641,7 +644,7 @@ export default {
         markdown = await downloadTelegramDocument(env.BOT_TOKEN, message.document);
       } catch (error) {
         if (error?.code === "TEXT_FILE_TOO_LARGE") {
-          await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+          await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
         } else {
           console.error("Failed to read uploaded document", error);
           await tgCall("sendMessage", env.BOT_TOKEN, {
@@ -671,18 +674,19 @@ export default {
           draftStub,
           currentSession,
           markdown,
-          locale
+          locale,
+          env.STATS
         );
       } catch (error) {
-        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
       }
       return new Response("OK");
     }
 
     try {
-      await sendMarkdown(chatId, markdown, env.BOT_TOKEN);
+      await sendMarkdown(chatId, markdown, env.BOT_TOKEN, [], env.STATS);
     } catch (error) {
-      await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+      await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
     }
     return new Response("OK");
   },
@@ -691,6 +695,7 @@ export default {
 export {
   DraftSession,
   TestFixtureStore,
+  StatsStore,
   markdownToEntities,
   splitTelegramWithEntities,
   isCommand,
