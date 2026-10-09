@@ -8,6 +8,7 @@ Live bot: **@tgMdFormatter_bot**
 
 - Markdown → Telegram Rich Message
 - Long structured messages
+- Automatic splitting of documents longer than one Rich Message limit
 - Headings, lists, quotes, tables, code blocks and links
 - Photos, audio, voice messages, video and files inside the same Rich Message
 - Automatic media linking — users do not need to write `tg://...` URLs
@@ -36,7 +37,7 @@ This is **bold** and this is *italic*.
 - two
 ```
 
-The bot returns one formatted Rich Message.
+The bot returns one formatted Rich Message. If the document is too large for a single Rich Message, it is split automatically into multiple structured Rich Messages at safe Markdown boundaries.
 
 ### Text with media
 
@@ -186,10 +187,10 @@ Example JSON body:
 
 Open the Worker URL in a browser.
 
-Current Durable Object build returns:
+Current build returns:
 
 ```text
-tg-md-bot: OK durable-v1
+tg-md-bot: OK split-v1
 ```
 
 ## Demo document
@@ -220,7 +221,7 @@ CI runs automatically on pushes and pull requests to `main`.
 
 ## Current limits
 
-Telegram Rich Messages have platform limits, including message size and media count. The bot currently enforces a maximum of **50 media items** per Rich Message.
+Telegram Rich Messages have platform limits, including message size and media count. The bot uses a conservative ~30,000-character target and automatically splits longer Markdown at structural boundaries where possible. Fenced code blocks are reopened/closed when a single code block itself must be split. Media are attached only to the chunk that references them. The bot currently enforces a maximum of **50 media items** in one prepared document.
 
 ## Status
 
