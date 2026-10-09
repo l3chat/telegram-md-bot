@@ -38,6 +38,13 @@ import {
 import {
   testPageMarkdown,
 } from "./test-page.js";
+import {
+  testPageWithMedia,
+} from "./test-media-page.js";
+import {
+  TestFixtureStore,
+  getOrCreateTestFixtures,
+} from "./test-fixture-store.js";
 
 const MAX_TEXT_FILE_BYTES = 20 * 1024 * 1024;
 const MAX_RICH_MESSAGE_PARTS = 10;
@@ -382,10 +389,19 @@ export default {
 
     if (isCommand(message.text, "test")) {
       try {
+        const fixtures = await getOrCreateTestFixtures(
+          env.TEST_FIXTURES,
+          chatId
+        );
         await sendMarkdown(
           chatId,
-          testPageMarkdown(locale),
-          env.BOT_TOKEN
+          testPageWithMedia(locale),
+          env.BOT_TOKEN,
+          [
+            { id: "test_photo", media: { type: "photo", media: fixtures.photo } },
+            { id: "test_audio", media: { type: "audio", media: fixtures.audio } },
+            { id: "test_video", media: { type: "video", media: fixtures.video } },
+          ]
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
@@ -554,6 +570,7 @@ export default {
 
 export {
   DraftSession,
+  TestFixtureStore,
   markdownToEntities,
   splitTelegramWithEntities,
   isCommand,

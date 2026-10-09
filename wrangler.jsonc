@@ -2,12 +2,18 @@
   "name": "tg-md-bot",
   "main": "src/index.js",
   "compatibility_date": "2026-02-03",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "durable_objects": {
     "bindings": [
       {
         "name": "DRAFT_SESSIONS",
         "class_name": "DraftSession"
+      },
+      {
+        "name": "TEST_FIXTURES",
+        "class_name": "TestFixtureStore"
       }
     ]
   },
@@ -40,7 +46,15 @@
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["DraftSession"]
+      "new_sqlite_classes": [
+        "DraftSession"
+      ]
+    },
+    {
+      "tag": "v2",
+      "new_sqlite_classes": [
+        "TestFixtureStore"
+      ]
     }
   ]
 }
