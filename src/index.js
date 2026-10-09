@@ -555,7 +555,7 @@ export default {
           env.BOT_TOKEN,
           [],
           env.STATS,
-          userId
+          null
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -573,7 +573,7 @@ export default {
           env.BOT_TOKEN,
           [],
           env.STATS,
-          userId
+          null
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -598,7 +598,7 @@ export default {
             { id: "test_video", media: { type: "video", media: fixtures.video } },
           ],
           env.STATS,
-          userId
+          null
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
