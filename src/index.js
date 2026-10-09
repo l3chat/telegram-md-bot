@@ -382,7 +382,9 @@ export default {
         console.error("Profile sync failed", error);
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
-          text: "Profile synchronization failed. Check Worker logs.",
+          text:
+            "Profile synchronization failed:\n" +
+            String(error?.message || error).slice(0, 3500),
         }).catch(() => {});
       }
       return new Response("OK");
