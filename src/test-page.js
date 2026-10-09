@@ -20,6 +20,7 @@ const PAGES = {
     detailsText: "This text is inside an expandable section.",
     mediaText: "For real media, send files first and then reference their names in Markdown. Example syntax:",
     footer: "Built with **GPT-6.1**.",
+    sourceLabel: "Original Markdown source / tutorial",
   },
   ru: {
     title: "Telegram Rich Message — тестовая страница",
@@ -40,6 +41,7 @@ const PAGES = {
     detailsText: "Этот текст находится внутри сворачиваемого раздела.",
     mediaText: "Для реальных медиа сначала пришлите файлы, затем укажите их имена в Markdown. Пример синтаксиса:",
     footer: "Бот создан с помощью **GPT-6.1**.",
+    sourceLabel: "Исходный Markdown / tutorial",
   },
   de: {
     title: "Telegram Rich Message — Testseite",
@@ -60,6 +62,7 @@ const PAGES = {
     detailsText: "Dieser Text befindet sich in einem aufklappbaren Abschnitt.",
     mediaText: "Für echte Medien zuerst Dateien senden und anschließend ihre Namen im Markdown referenzieren. Beispiel:",
     footer: "Erstellt mit **GPT-6.1**.",
+    sourceLabel: "Markdown-Quelltext / Tutorial",
   },
   fr: {
     title: "Telegram Rich Message — Page de test",
@@ -80,6 +83,7 @@ const PAGES = {
     detailsText: "Ce texte se trouve dans une section repliable.",
     mediaText: "Pour de vrais médias, envoyez d’abord les fichiers puis référencez leurs noms dans Markdown. Exemple :",
     footer: "Créé avec **GPT-6.1**.",
+    sourceLabel: "Source Markdown / tutoriel",
   },
   uk: {
     title: "Telegram Rich Message — тестова сторінка",
@@ -100,12 +104,23 @@ const PAGES = {
     detailsText: "Цей текст знаходиться всередині розгортаного розділу.",
     mediaText: "Для справжніх медіа спочатку надішліть файли, а потім укажіть їхні назви в Markdown. Приклад:",
     footer: "Бот створено за допомогою **GPT-6.1**.",
+    sourceLabel: "Вихідний Markdown / tutorial",
   },
 };
 
 function testPageLocale(value) {
   const code = String(value || "").toLowerCase().split(/[-_]/)[0];
   return PAGES[code] ? code : "en";
+}
+
+function tutorialSourceUrl(locale) {
+  const lang = testPageLocale(locale);
+  return (
+    "https://raw.githubusercontent.com/l3chat/telegram-md-bot/main/" +
+    "docs/tutorial/test-page." +
+    lang +
+    ".md"
+  );
 }
 
 function testPageMarkdown(locale) {
@@ -200,6 +215,8 @@ function testPageMarkdown(locale) {
     "",
     p.footer,
     "",
+    "[" + p.sourceLabel + "](" + tutorialSourceUrl(locale) + ")",
+    "",
     "[GitHub](" + GITHUB_URL + ")",
   ].join("\n");
 }
@@ -208,5 +225,6 @@ export {
   GITHUB_URL,
   PAGES,
   testPageLocale,
+  tutorialSourceUrl,
   testPageMarkdown,
 };
