@@ -223,7 +223,7 @@ Open the Worker URL in a browser.
 Current build returns:
 
 ```text
-tg-md-bot: OK test-page-v1
+tg-md-bot: OK hardened-v1
 ```
 
 ## Demo document
@@ -290,3 +290,37 @@ Current production architecture:
 - [Deutsch](BOT_DESCRIPTION.de.md)
 - [Français](BOT_DESCRIPTION.fr.md)
 - [Українська](BOT_DESCRIPTION.uk.md)
+
+
+## Public hardening
+
+The public Worker includes three protection layers:
+
+- per-user Cloudflare Rate Limiting bindings: up to 90 incoming updates/minute;
+- an additional heavy-operation limit of 40/minute for Markdown, media, files, `/test`, and `/send`;
+- rate-limit notices are themselves limited to one per minute per user.
+
+The standard Telegram Bot API can download files via `getFile` only up to **20 MB**, so oversized text files are rejected with a localized explanation before download.
+
+A single bot operation is limited to **10 Rich Messages** (roughly 300,000 characters at the normal split target). This prevents one request from creating an excessive burst of outgoing Telegram messages.
+
+Telegram/API failures are mapped to localized actionable messages for:
+
+- flood/rate limits;
+- invalid or expired file references;
+- unsupported/invalid Rich Message formatting;
+- platform size/count limits;
+- unexpected errors.
+
+## Production smoke test
+
+`.github/workflows/smoke.yml` runs after every push to `main` and waits for the Cloudflare production Worker to expose the expected health version.
+
+It verifies:
+
+- production health response;
+- English privacy page;
+- German localized privacy page;
+- GPT-6.1 attribution and GitHub link on the public privacy page.
+
+The smoke workflow retries for several minutes so it can tolerate normal Cloudflare deployment delay.
