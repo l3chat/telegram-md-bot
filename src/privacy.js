@@ -82,6 +82,9 @@ function privacyMarkdown(locale, publicUrl) {
     ...p.bullets.map((item) => "- " + item),
     "",
     p.source,
+    "",
+    "Built with GPT-6.1.",
+    "GitHub: https://github.com/l3chat/telegram-md-bot",
   ];
   if (publicUrl) {
     lines.push("", "Privacy page: " + publicUrl);
