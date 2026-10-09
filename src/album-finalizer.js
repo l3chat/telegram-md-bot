@@ -1,5 +1,6 @@
 import { prepareRichMarkdownMedia } from "./media.js";
 import { splitRichMessage } from "./rich-split.js";
+import { trackStat } from "./stats-store.js";
 
 const MAX_RICH_MESSAGE_PARTS = 10;
 
@@ -19,7 +20,7 @@ async function telegramApiCall(method, token, payload) {
   return data;
 }
 
-async function finalizeAlbumDraft(token, chatId, session) {
+async function finalizeAlbumDraft(token, chatId, session, stats = null) {
   const prepared = prepareRichMarkdownMedia(session.markdown, session, {
     appendUnreferenced: true,
   });
@@ -44,6 +45,7 @@ async function finalizeAlbumDraft(token, chatId, session) {
           ? { markdown: part.markdown, media: part.media }
           : { markdown: part.markdown },
     });
+    await trackStat(stats, "rich_messages");
   }
 }
 
