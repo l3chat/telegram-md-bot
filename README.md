@@ -234,6 +234,16 @@ A full manual demo / regression test is available in:
 
 It exercises headings, lists, task lists, quotes, tables, code, links, formulas and media placement.
 
+## Media test fixtures
+
+The repository includes deterministic test media in [`test-media/`](test-media/README.md):
+
+- five numbered PNG images;
+- two short MP3 chimes;
+- two short MP4 number-transition videos.
+
+They are intended for manual media-linking, album, `/media`, and `/send` regression tests.
+
 ## Testing
 
 Run:
