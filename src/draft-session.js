@@ -4,8 +4,10 @@ import {
   setPendingMarkdown,
   touchSession,
 } from "./media.js";
+import { finalizeAlbumDraft } from "./album-finalizer.js";
 
 const TTL_MS = 24 * 60 * 60 * 1000;
+const ALBUM_QUIET_MS = 2000;
 
 export class DraftSession {
   constructor(state, env) {
@@ -34,7 +36,49 @@ export class DraftSession {
     return emptyMediaSession();
   }
 
+  async scheduleAlbum(meta) {
+    await this.state.storage.put("album_finalize", meta);
+    await this.state.storage.setAlarm(Date.now() + ALBUM_QUIET_MS);
+    return { ok: true };
+  }
+
   async alarm() {
+    const pending = await this.state.storage.get("album_finalize");
+
+    if (pending) {
+      const session = await this.read();
+      const sameRevision =
+        pending.revision == null || session.revision === pending.revision;
+      const sameGroup =
+        !pending.media_group_id ||
+        session.media_group_id === pending.media_group_id;
+
+      if (session.markdown && sameRevision && sameGroup) {
+        try {
+          await finalizeAlbumDraft(
+            this.env.BOT_TOKEN,
+            pending.chat_id,
+            session
+          );
+          await this.state.storage.deleteAll();
+          return;
+        } catch (error) {
+          console.error("Automatic album finalize failed", error);
+          await this.state.storage.put("album_error", {
+            message: String(error?.message || error).slice(0, 1200),
+            at: new Date().toISOString(),
+          });
+          await this.state.storage.delete("album_finalize");
+          await this.state.storage.setAlarm(Date.now() + TTL_MS);
+          return;
+        }
+      }
+
+      await this.state.storage.delete("album_finalize");
+      await this.state.storage.setAlarm(Date.now() + TTL_MS);
+      return;
+    }
+
     await this.state.storage.deleteAll();
   }
 
@@ -74,6 +118,10 @@ export class DraftSession {
       const current = await this.read();
       const next = touchSession(current, body.message || {});
       return Response.json(await this.write(next));
+    }
+
+    if (action === "schedule-album") {
+      return Response.json(await this.scheduleAlbum(body));
     }
 
     if (action === "replace") {
@@ -142,8 +190,13 @@ async function replaceDraftSession(stub, session) {
   return callDraftSession(stub, "replace", { session });
 }
 
+async function scheduleAlbumFinalize(stub, meta) {
+  return callDraftSession(stub, "schedule-album", meta);
+}
+
 export {
   TTL_MS,
+  ALBUM_QUIET_MS,
   draftSessionName,
   draftSessionStub,
   getDraftSession,
@@ -152,4 +205,5 @@ export {
   setDraftMarkdown,
   touchDraftSession,
   replaceDraftSession,
+  scheduleAlbumFinalize,
 };
