@@ -30,5 +30,6 @@
 - [x] Add rate limiting / abuse protection
 - [x] Add clearer platform-limit error messages
 - [x] Add production smoke test after deployment
-- [ ] Review album workflow and reduce need for manual `/send`
-- [ ] Add more end-to-end tests for Rich Message media
+- [x] Add persistent webhook/response diagnostics
+- [x] Review album workflow and reduce need for manual `/send`
+- [x] Add more end-to-end tests for Rich Message media
