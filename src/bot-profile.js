@@ -1,4 +1,4 @@
-const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v6";
+const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v7";
 
 const DEFAULT_LOCALE = "en";
 const PUBLIC_LOCALES = ["en", "ru", "de", "fr", "uk"];
@@ -18,6 +18,7 @@ const PROFILE = {
       { command: "clear", description: "Discard the current draft" },
       { command: "privacy", description: "Privacy and temporary storage" },
       { command: "stats", description: "Show bot usage statistics" },
+      { command: "share", description: "Get a shareable referral link" },
     ],
   },
   ru: {
@@ -34,6 +35,7 @@ const PROFILE = {
       { command: "clear", description: "Удалить текущий черновик" },
       { command: "privacy", description: "Конфиденциальность и хранение данных" },
       { command: "stats", description: "Показать статистику использования" },
+      { command: "share", description: "Получить ссылку для друзей" },
     ],
   },
   de: {
@@ -50,6 +52,7 @@ const PROFILE = {
       { command: "clear", description: "Aktuellen Entwurf löschen" },
       { command: "privacy", description: "Datenschutz und temporäre Speicherung" },
       { command: "stats", description: "Nutzungsstatistik anzeigen" },
+      { command: "share", description: "Link zum Teilen anzeigen" },
     ],
   },
   fr: {
@@ -66,6 +69,7 @@ const PROFILE = {
       { command: "clear", description: "Supprimer le brouillon actuel" },
       { command: "privacy", description: "Confidentialité et stockage temporaire" },
       { command: "stats", description: "Afficher les statistiques d’utilisation" },
+      { command: "share", description: "Obtenir un lien à partager" },
     ],
   },
   uk: {
@@ -82,6 +86,7 @@ const PROFILE = {
       { command: "clear", description: "Видалити поточну чернетку" },
       { command: "privacy", description: "Конфіденційність і зберігання даних" },
       { command: "stats", description: "Показати статистику використання" },
+      { command: "share", description: "Отримати посилання для друзів" },
     ],
   },
 };
