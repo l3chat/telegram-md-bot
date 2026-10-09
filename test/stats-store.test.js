@@ -47,3 +47,29 @@ test("StatsStore counts active users and aggregate events", async () => {
   assert.equal(keys.length, 2);
   assert.ok(keys.every((key) => !key.includes("1001") && !key.includes("1002")));
 });
+
+
+test("StatsStore attributes referral conversion without raw user ids", async () => {
+  const storage = new MemoryStorage();
+  const store = new StatsStore(
+    { storage },
+    { STATS_SALT: "test-salt" }
+  );
+
+  await store.track({ event: "starts", user_id: 2001, source: "website" });
+  await store.track({ event: "updates", user_id: 2001 });
+  await store.track({ event: "rich_messages", user_id: 2001 });
+  await store.track({ event: "starts", user_id: 2002, source: "share" });
+
+  const snapshot = await store.snapshot();
+
+  assert.equal(snapshot.starts, 2);
+  assert.deepEqual(snapshot.sources.website, {
+    users: 1,
+    rich_users: 1,
+  });
+  assert.deepEqual(snapshot.sources.share, {
+    users: 1,
+    rich_users: 0,
+  });
+});
