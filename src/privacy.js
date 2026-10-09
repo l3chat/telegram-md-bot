@@ -122,7 +122,7 @@ footer{margin-top:2em;color:#666;font-size:.95em}
 <p>${escapeHtml(p.intro)}</p>
 <ul>${p.bullets.map((x) => "<li>" + escapeHtml(x) + "</li>").join("")}</ul>
 <footer>${escapeHtml(p.source)}<br>
-<a href="https://github.com/l3chat/telegram-md-bot">github.com/l3chat/telegram-md-bot</a>
+Built with GPT-6.1 · <a href="https://github.com/l3chat/telegram-md-bot">github.com/l3chat/telegram-md-bot</a>
 </footer>
 </body>
 </html>`;
