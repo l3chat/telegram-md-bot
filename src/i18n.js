@@ -49,7 +49,7 @@ const TEXT = {
       "",
       "Если альбом содержит подпись/Markdown, бот автоматически соберёт его через пару секунд после последнего элемента. Без подписи просто пришлите Markdown следующим сообщением; `/send` остаётся запасным вариантом.",
       "",
-      "Команды: `/test [ru|en|de|fr|uk]` — тестовая страница на выбранном языке, `/media` — показать ожидающие медиа, `/send` — собрать текущий черновик, `/clear` — очистить черновик, `/privacy` — конфиденциальность, `/stats` — статистика использования, `/help` — подсказка.",
+      "Команды: `/test [ru|en|de|fr|uk]` — тестовая страница на выбранном языке, `/media` — показать ожидающие медиа, `/send` — собрать текущий черновик, `/clear` — очистить черновик, `/privacy` — конфиденциальность, `/stats` — статистика использования, `/share` — ссылка для друзей, `/help` — подсказка.",
       "",
       "Другой язык: `/help en`, `/help de`, `/help fr`, `/help uk`, `/help ru`.",
       "",
@@ -94,6 +94,10 @@ const TEXT = {
     statsMedia: "Медиа",
     statsErrors: "Ошибки",
     statsSince: "Статистика с",
+    statsSources: "Источники (пользователи / создали Rich Message)",
+    statsConverted: "конверсий",
+    shareText: "Markdown → Rich Message — бот для Markdown, длинных текстов и медиа в Telegram.",
+    shareHint: "Перешлите эту ссылку другу — переход будет учтён в /stats.",
     unexpectedError: "Произошла непредвиденная ошибка при создании Rich Message. Попробуйте ещё раз; если ошибка повторяется, используйте /help или GitHub."
   },
   en: {
@@ -120,7 +124,7 @@ const TEXT = {
       "",
       "If an album contains a caption/Markdown, the bot automatically finalizes it a couple of seconds after the last item. Without a caption, just send Markdown next; `/send` remains a fallback.",
       "",
-      "Commands: `/test [ru|en|de|fr|uk]` — Test Page in the selected language, `/media` — show pending media, `/send` — build the current draft, `/clear` — clear the draft, `/privacy` — privacy, `/stats` — usage statistics, `/help` — show help.",
+      "Commands: `/test [ru|en|de|fr|uk]` — Test Page in the selected language, `/media` — show pending media, `/send` — build the current draft, `/clear` — clear the draft, `/privacy` — privacy, `/stats` — usage statistics, `/share` — shareable link, `/help` — show help.",
       "",
       "Other languages: `/help ru`, `/help de`, `/help fr`, `/help uk`, `/help en`.",
       "",
@@ -165,6 +169,10 @@ const TEXT = {
     statsMedia: "Media",
     statsErrors: "Errors",
     statsSince: "Statistics since",
+    statsSources: "Sources (users / created Rich Message)",
+    statsConverted: "converted",
+    shareText: "Markdown → Rich Message turns Markdown, long text and media into Telegram Rich Messages.",
+    shareHint: "Share this link with a friend — the referral will appear in /stats.",
     unexpectedError: "An unexpected error occurred while building the Rich Message. Try again; if it repeats, use /help or GitHub."
   },
   de: {
@@ -191,7 +199,7 @@ const TEXT = {
       "",
       "Enthält das Album eine Beschriftung/Markdown, wird es wenige Sekunden nach dem letzten Element automatisch erstellt. Ohne Beschriftung einfach danach Markdown senden; `/send` bleibt als Reserve.",
       "",
-      "Befehle: `/test [ru|en|de|fr|uk]` — Testseite in der gewählten Sprache, `/media` — wartende Medien anzeigen, `/send` — aktuellen Entwurf erstellen, `/clear` — Entwurf löschen, `/privacy` — Datenschutz, `/stats` — Nutzungsstatistik, `/help` — Hilfe.",
+      "Befehle: `/test [ru|en|de|fr|uk]` — Testseite in der gewählten Sprache, `/media` — wartende Medien anzeigen, `/send` — aktuellen Entwurf erstellen, `/clear` — Entwurf löschen, `/privacy` — Datenschutz, `/stats` — Nutzungsstatistik, `/share` — Link zum Teilen, `/help` — Hilfe.",
       "",
       "Andere Sprache: `/help ru`, `/help en`, `/help fr`, `/help uk`, `/help de`.",
       "",
@@ -236,6 +244,10 @@ const TEXT = {
     statsMedia: "Medien",
     statsErrors: "Fehler",
     statsSince: "Statistik seit",
+    statsSources: "Quellen (Benutzer / Rich Message erstellt)",
+    statsConverted: "konvertiert",
+    shareText: "Markdown → Rich Message verwandelt Markdown, lange Texte und Medien in Telegram Rich Messages.",
+    shareHint: "Teile diesen Link — die Herkunft erscheint in /stats.",
     unexpectedError: "Beim Erstellen der Rich Message ist ein unerwarteter Fehler aufgetreten. Versuche es erneut; bei Wiederholung nutze /help oder GitHub."
   },
   fr: {
@@ -262,7 +274,7 @@ const TEXT = {
       "",
       "Si l’album contient une légende/du Markdown, le bot le finalise automatiquement quelques secondes après le dernier élément. Sans légende, envoyez ensuite le Markdown ; `/send` reste disponible en secours.",
       "",
-      "Commandes : `/test [ru|en|de|fr|uk]` — page de test dans la langue choisie, `/media` — afficher les médias en attente, `/send` — construire le brouillon actuel, `/clear` — effacer le brouillon, `/privacy` — confidentialité, `/stats` — statistiques d’utilisation, `/help` — aide.",
+      "Commandes : `/test [ru|en|de|fr|uk]` — page de test dans la langue choisie, `/media` — afficher les médias en attente, `/send` — construire le brouillon actuel, `/clear` — effacer le brouillon, `/privacy` — confidentialité, `/stats` — statistiques d’utilisation, `/share` — lien à partager, `/help` — aide.",
       "",
       "Autre langue : `/help ru`, `/help en`, `/help de`, `/help uk`, `/help fr`.",
       "",
@@ -307,6 +319,10 @@ const TEXT = {
     statsMedia: "Médias",
     statsErrors: "Erreurs",
     statsSince: "Statistiques depuis",
+    statsSources: "Sources (utilisateurs / Rich Message créé)",
+    statsConverted: "convertis",
+    shareText: "Markdown → Rich Message transforme Markdown, textes longs et médias en Rich Messages Telegram.",
+    shareHint: "Partagez ce lien — la provenance apparaîtra dans /stats.",
     unexpectedError: "Une erreur inattendue s’est produite pendant la création du Rich Message. Réessayez ; si elle se répète, utilisez /help ou GitHub."
   },
   uk: {
@@ -333,7 +349,7 @@ const TEXT = {
       "",
       "Якщо альбом містить підпис/Markdown, бот автоматично збере його через кілька секунд після останнього елемента. Без підпису просто надішліть Markdown наступним повідомленням; `/send` лишається запасним варіантом.",
       "",
-      "Команди: `/test [ru|en|de|fr|uk]` — тестова сторінка вибраною мовою, `/media` — показати медіа, що очікують, `/send` — зібрати поточну чернетку, `/clear` — очистити чернетку, `/privacy` — конфіденційність, `/stats` — статистика використання, `/help` — довідка.",
+      "Команди: `/test [ru|en|de|fr|uk]` — тестова сторінка вибраною мовою, `/media` — показати медіа, що очікують, `/send` — зібрати поточну чернетку, `/clear` — очистити чернетку, `/privacy` — конфіденційність, `/stats` — статистика використання, `/share` — посилання для друзів, `/help` — довідка.",
       "",
       "Інша мова: `/help ru`, `/help en`, `/help de`, `/help fr`, `/help uk`.",
       "",
@@ -378,6 +394,10 @@ const TEXT = {
     statsMedia: "Медіа",
     statsErrors: "Помилки",
     statsSince: "Статистика з",
+    statsSources: "Джерела (користувачі / створили Rich Message)",
+    statsConverted: "конверсій",
+    shareText: "Markdown → Rich Message — бот для Markdown, довгих текстів і медіа в Telegram.",
+    shareHint: "Поділіться цим посиланням — джерело буде видно в /stats.",
     unexpectedError: "Під час створення Rich Message сталася непередбачена помилка. Спробуйте ще раз; якщо вона повторюється, скористайтеся /help або GitHub."
   }
 };
