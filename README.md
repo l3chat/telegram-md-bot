@@ -72,8 +72,36 @@ A single photo can be sent together with a Markdown caption. The bot uses the ca
 - `/media` — list media waiting in the current draft
 - `/send` — build the current draft
 - `/clear` — discard the current draft
+- `/privacy` — show the localized privacy notice and public privacy-page link
 
 The bot automatically chooses the UI language from Telegram's `language_code`; unsupported languages fall back to English.
+
+## Public Telegram profile
+
+The Worker automatically synchronizes the bot's public Telegram configuration through the Bot API after deployment/first webhook activity:
+
+- localized command menus;
+- localized display name;
+- localized short description;
+- localized full description.
+
+Supported profile languages: **EN / RU / DE / FR / UK**.
+
+The default profile is English.
+
+## Privacy
+
+The bot provides a localized `/privacy` command.
+
+A public privacy page is served directly by the Worker:
+
+```text
+https://<worker>.workers.dev/privacy
+```
+
+Language can be selected with `?lang=en|ru|de|fr|uk`.
+
+A repository copy is also available in `PRIVACY.md`.
 
 ## Architecture
 
@@ -190,7 +218,7 @@ Open the Worker URL in a browser.
 Current build returns:
 
 ```text
-tg-md-bot: OK split-v1
+tg-md-bot: OK public-v1
 ```
 
 ## Demo document
