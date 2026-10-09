@@ -11,6 +11,32 @@
       }
     ]
   },
+  "ratelimits": [
+    {
+      "name": "USER_RATE_LIMITER",
+      "namespace_id": "202610091",
+      "simple": {
+        "limit": 90,
+        "period": 60
+      }
+    },
+    {
+      "name": "HEAVY_RATE_LIMITER",
+      "namespace_id": "202610092",
+      "simple": {
+        "limit": 40,
+        "period": 60
+      }
+    },
+    {
+      "name": "RATE_NOTICE_LIMITER",
+      "namespace_id": "202610093",
+      "simple": {
+        "limit": 1,
+        "period": 60
+      }
+    }
+  ],
   "migrations": [
     {
       "tag": "v1",
