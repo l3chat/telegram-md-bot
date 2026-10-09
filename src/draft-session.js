@@ -58,12 +58,17 @@ export class DraftSession {
           await finalizeAlbumDraft(
             this.env.BOT_TOKEN,
             pending.chat_id,
-            session
+            session,
+            this.env.STATS
           );
           await this.state.storage.deleteAll();
           return;
         } catch (error) {
           console.error("Automatic album finalize failed", error);
+          try {
+            const mod = await import("./stats-store.js");
+            await mod.trackStat(this.env.STATS, "errors");
+          } catch {}
           await this.state.storage.put("album_error", {
             message: String(error?.message || error).slice(0, 1200),
             at: new Date().toISOString(),
