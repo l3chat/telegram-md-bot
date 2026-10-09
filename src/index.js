@@ -39,6 +39,27 @@ import {
   testPageMarkdown,
 } from "./test-page.js";
 
+const MAX_TEXT_FILE_BYTES = 20 * 1024 * 1024;
+const MAX_RICH_MESSAGE_PARTS = 10;
+
+class BotOperationError extends Error {
+  constructor(code, message, details = {}) {
+    super(message);
+    this.name = "BotOperationError";
+    this.code = code;
+    Object.assign(this, details);
+  }
+}
+
+class TelegramApiError extends Error {
+  constructor(method, response) {
+    super(method + " failed: " + JSON.stringify(response));
+    this.name = "TelegramApiError";
+    this.method = method;
+    this.telegram = response;
+  }
+}
+
 async function tgCall(method, token, payload) {
   const url = `https://api.telegram.org/bot${token}/${method}`;
   const r = await fetch(url, {
@@ -47,8 +68,100 @@ async function tgCall(method, token, payload) {
     body: JSON.stringify(payload),
   });
   const data = await r.json();
-  if (!data.ok) throw new Error(`${method} failed: ${JSON.stringify(data)}`);
+  if (!data.ok) throw new TelegramApiError(method, data);
   return data;
+}
+
+function errorMessageKey(error) {
+  if (error?.code === "TEXT_FILE_TOO_LARGE") return "textFileTooLarge";
+  if (error?.code === "DOCUMENT_TOO_LONG") return "documentTooLong";
+
+  const code = error?.telegram?.error_code;
+  const description = String(
+    error?.telegram?.description || error?.message || ""
+  ).toLowerCase();
+
+  if (code === 429 || description.includes("flood")) {
+    return "telegramFloodWait";
+  }
+
+  if (
+    description.includes("file_id") ||
+    description.includes("file reference") ||
+    description.includes("wrong file") ||
+    description.includes("failed to get file")
+  ) {
+    return "telegramFileError";
+  }
+
+  if (
+    description.includes("too long") ||
+    description.includes("too many") ||
+    description.includes("limit")
+  ) {
+    return "platformLimitError";
+  }
+
+  if (error instanceof TelegramApiError && error.method === "sendRichMessage") {
+    return "telegramFormatError";
+  }
+
+  return "unexpectedError";
+}
+
+async function sendLocalizedError(chatId, token, locale, error) {
+  console.error("User-facing bot error", error);
+  try {
+    await tgCall("sendMessage", token, {
+      chat_id: chatId,
+      text: t(locale, errorMessageKey(error)),
+    });
+  } catch (sendError) {
+    console.error("Failed to send localized error", sendError);
+  }
+}
+
+function rateLimitKey(message) {
+  const userId = message?.from?.id || message?.chat?.id || "unknown";
+  return String(userId);
+}
+
+function isHeavyUpdate(message) {
+  if (
+    message?.document ||
+    message?.photo ||
+    message?.audio ||
+    message?.voice ||
+    message?.video
+  ) {
+    return true;
+  }
+
+  const text = message?.text || "";
+  if (isCommand(text, ["help", "start", "privacy", "media", "clear"])) {
+    return false;
+  }
+  return Boolean(text || message?.caption);
+}
+
+async function consumeLimiter(binding, key) {
+  if (!binding?.limit) return true;
+  const result = await binding.limit({ key });
+  return Boolean(result?.success);
+}
+
+async function notifyRateLimited(env, chatId, locale, key, messageKey) {
+  const mayNotify = await consumeLimiter(env.RATE_NOTICE_LIMITER, key);
+  if (!mayNotify) return;
+
+  try {
+    await tgCall("sendMessage", env.BOT_TOKEN, {
+      chat_id: chatId,
+      text: t(locale, messageKey),
+    });
+  } catch (error) {
+    console.error("Failed to send rate-limit notice", error);
+  }
 }
 
 function isCommand(text, names) {
@@ -72,6 +185,16 @@ function isMarkdownDocument(document) {
 }
 
 async function downloadTelegramDocument(token, document) {
+  if (
+    Number.isFinite(document?.file_size) &&
+    document.file_size > MAX_TEXT_FILE_BYTES
+  ) {
+    throw new BotOperationError(
+      "TEXT_FILE_TOO_LARGE",
+      "Text file exceeds Telegram getFile limit"
+    );
+  }
+
   const fileInfo = await tgCall("getFile", token, { file_id: document.file_id });
   const filePath = fileInfo.result?.file_path;
   if (!filePath) throw new Error("Telegram did not return file_path");
@@ -86,6 +209,14 @@ async function sendMarkdown(chatId, markdown, token, media = []) {
   if (!markdown?.trim()) return;
 
   const parts = splitRichMessage(markdown, media);
+
+  if (parts.length > MAX_RICH_MESSAGE_PARTS) {
+    throw new BotOperationError(
+      "DOCUMENT_TOO_LONG",
+      "Document would produce " + parts.length + " Rich Messages",
+      { parts: parts.length }
+    );
+  }
 
   for (const part of parts) {
     try {
@@ -163,7 +294,7 @@ export default {
         });
       }
 
-      return new Response("tg-md-bot: OK test-page-v1");
+      return new Response("tg-md-bot: OK hardened-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
@@ -190,30 +321,75 @@ export default {
 
     const locale = localeFromMessage(message);
     const draftStub = draftSessionStub(env.DRAFT_SESSIONS, message);
+    const limiterKey = rateLimitKey(message);
+
+    const withinGeneralLimit = await consumeLimiter(
+      env.USER_RATE_LIMITER,
+      limiterKey
+    );
+    if (!withinGeneralLimit) {
+      await notifyRateLimited(
+        env,
+        chatId,
+        locale,
+        limiterKey,
+        "rateLimited"
+      );
+      return new Response("OK");
+    }
+
+    if (isHeavyUpdate(message)) {
+      const withinHeavyLimit = await consumeLimiter(
+        env.HEAVY_RATE_LIMITER,
+        limiterKey
+      );
+      if (!withinHeavyLimit) {
+        await notifyRateLimited(
+          env,
+          chatId,
+          locale,
+          limiterKey,
+          "heavyRateLimited"
+        );
+        return new Response("OK");
+      }
+    }
 
     if (isHelpCommand(message.text)) {
       const helpLocale = localeFromHelpCommand(message.text, locale);
-      await sendMarkdown(chatId, helpMarkdown(helpLocale), env.BOT_TOKEN);
+      try {
+        await sendMarkdown(chatId, helpMarkdown(helpLocale), env.BOT_TOKEN);
+      } catch (error) {
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+      }
       return new Response("OK");
     }
 
     if (isCommand(message.text, "privacy")) {
       const publicUrl =
         url.origin + "/privacy?lang=" + encodeURIComponent(locale);
-      await sendMarkdown(
-        chatId,
-        privacyMarkdown(locale, publicUrl),
-        env.BOT_TOKEN
-      );
+      try {
+        await sendMarkdown(
+          chatId,
+          privacyMarkdown(locale, publicUrl),
+          env.BOT_TOKEN
+        );
+      } catch (error) {
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+      }
       return new Response("OK");
     }
 
     if (isCommand(message.text, "test")) {
-      await sendMarkdown(
-        chatId,
-        testPageMarkdown(locale),
-        env.BOT_TOKEN
-      );
+      try {
+        await sendMarkdown(
+          chatId,
+          testPageMarkdown(locale),
+          env.BOT_TOKEN
+        );
+      } catch (error) {
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+      }
       return new Response("OK");
     }
 
@@ -257,11 +433,7 @@ export default {
           locale
         );
       } catch (error) {
-        console.error("Failed to send draft", error);
-        await tgCall("sendMessage", env.BOT_TOKEN, {
-          chat_id: chatId,
-          text: t(locale, "draftSendFailed"),
-        });
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
       }
       return new Response("OK");
     }
@@ -302,11 +474,7 @@ export default {
             locale
           );
         } catch (error) {
-          console.error("Failed to send caption+media Rich Message", error);
-          await tgCall("sendMessage", env.BOT_TOKEN, {
-            chat_id: chatId,
-            text: t(locale, "captionMediaFailed"),
-          });
+          await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
         }
         return new Response("OK");
       }
@@ -336,11 +504,15 @@ export default {
       try {
         markdown = await downloadTelegramDocument(env.BOT_TOKEN, message.document);
       } catch (error) {
-        console.error("Failed to read uploaded document", error);
-        await tgCall("sendMessage", env.BOT_TOKEN, {
-          chat_id: chatId,
-          text: t(locale, "textDocumentReadFailed"),
-        });
+        if (error?.code === "TEXT_FILE_TOO_LARGE") {
+          await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+        } else {
+          console.error("Failed to read uploaded document", error);
+          await tgCall("sendMessage", env.BOT_TOKEN, {
+            chat_id: chatId,
+            text: t(locale, "textDocumentReadFailed"),
+          });
+        }
         return new Response("OK");
       }
     }
@@ -366,16 +538,16 @@ export default {
           locale
         );
       } catch (error) {
-        console.error("Failed to send Rich Message with auto media", error);
-        await tgCall("sendMessage", env.BOT_TOKEN, {
-          chat_id: chatId,
-          text: t(locale, "autoMediaFailed"),
-        });
+        await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
       }
       return new Response("OK");
     }
 
-    await sendMarkdown(chatId, markdown, env.BOT_TOKEN);
+    try {
+      await sendMarkdown(chatId, markdown, env.BOT_TOKEN);
+    } catch (error) {
+      await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
+    }
     return new Response("OK");
   },
 };
@@ -389,4 +561,8 @@ export {
   isMarkdownDocument,
   sendMarkdown,
   sendPreparedDraft,
+  errorMessageKey,
+  isHeavyUpdate,
+  MAX_RICH_MESSAGE_PARTS,
+  MAX_TEXT_FILE_BYTES,
 };
