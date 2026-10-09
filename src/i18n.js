@@ -69,7 +69,16 @@ const TEXT = {
     kindVoice: "Голосовая запись",
     kindAudio: "Аудио",
     kindVideo: "Видео",
-    kindFile: "Файл"
+    kindFile: "Файл",
+    rateLimited: "Слишком много запросов за короткое время. Подождите около минуты и попробуйте снова.",
+    heavyRateLimited: "Слишком много больших сообщений или медиа за короткое время. Подождите около минуты и продолжите.",
+    textFileTooLarge: "Текстовый файл слишком велик для загрузки через стандартный Telegram Bot API. Максимум для getFile — 20 МБ.",
+    documentTooLong: "Документ слишком большой для одной операции бота. Максимум — около 300 000 символов (до 10 Rich Messages). Разделите его на несколько документов.",
+    telegramFloodWait: "Telegram временно ограничил частоту отправки. Подождите немного и повторите попытку.",
+    telegramFileError: "Telegram не смог использовать один из файлов. Пришлите этот файл боту ещё раз и повторите попытку.",
+    telegramFormatError: "Telegram отклонил формат Rich Message. Проверьте Markdown, особенно незакрытые блоки кода, таблицы, формулы и HTML-блоки.",
+    platformLimitError: "Достигнут лимит Telegram Rich Message. Уменьшите размер одной части или количество медиа и попробуйте снова.",
+    unexpectedError: "Произошла непредвиденная ошибка при создании Rich Message. Попробуйте ещё раз; если ошибка повторяется, используйте /help или GitHub."
   },
   en: {
     help: [
@@ -122,7 +131,16 @@ const TEXT = {
     kindVoice: "Voice message",
     kindAudio: "Audio",
     kindVideo: "Video",
-    kindFile: "File"
+    kindFile: "File",
+    rateLimited: "Too many requests in a short time. Wait about a minute and try again.",
+    heavyRateLimited: "Too many large messages or media uploads in a short time. Wait about a minute and continue.",
+    textFileTooLarge: "The text file is too large to download through the standard Telegram Bot API. getFile supports up to 20 MB.",
+    documentTooLong: "This document is too large for one bot operation. The public limit is about 300,000 characters (up to 10 Rich Messages). Split it into several documents.",
+    telegramFloodWait: "Telegram temporarily limited the sending rate. Wait a little and try again.",
+    telegramFileError: "Telegram could not use one of the files. Send that file to the bot again and retry.",
+    telegramFormatError: "Telegram rejected the Rich Message format. Check the Markdown, especially unclosed code fences, tables, formulas and HTML blocks.",
+    platformLimitError: "A Telegram Rich Message platform limit was reached. Reduce the size of one part or the number of media items and try again.",
+    unexpectedError: "An unexpected error occurred while building the Rich Message. Try again; if it repeats, use /help or GitHub."
   },
   de: {
     help: [
@@ -175,7 +193,16 @@ const TEXT = {
     kindVoice: "Sprachnachricht",
     kindAudio: "Audio",
     kindVideo: "Video",
-    kindFile: "Datei"
+    kindFile: "Datei",
+    rateLimited: "Zu viele Anfragen in kurzer Zeit. Warte etwa eine Minute und versuche es erneut.",
+    heavyRateLimited: "Zu viele große Nachrichten oder Mediendateien in kurzer Zeit. Warte etwa eine Minute und fahre dann fort.",
+    textFileTooLarge: "Die Textdatei ist für den Download über die standardmäßige Telegram Bot API zu groß. getFile unterstützt maximal 20 MB.",
+    documentTooLong: "Das Dokument ist für einen einzelnen Bot-Vorgang zu groß. Öffentliches Limit: ca. 300.000 Zeichen (bis zu 10 Rich Messages). Teile es in mehrere Dokumente.",
+    telegramFloodWait: "Telegram hat die Sendefrequenz vorübergehend begrenzt. Warte kurz und versuche es erneut.",
+    telegramFileError: "Telegram konnte eine Datei nicht verwenden. Sende diese Datei erneut an den Bot und wiederhole den Vorgang.",
+    telegramFormatError: "Telegram hat das Rich-Message-Format abgelehnt. Prüfe Markdown, besonders nicht geschlossene Codeblöcke, Tabellen, Formeln und HTML-Blöcke.",
+    platformLimitError: "Ein Telegram-Rich-Message-Limit wurde erreicht. Verkleinere eine Teilnachricht oder reduziere die Anzahl der Medien.",
+    unexpectedError: "Beim Erstellen der Rich Message ist ein unerwarteter Fehler aufgetreten. Versuche es erneut; bei Wiederholung nutze /help oder GitHub."
   },
   fr: {
     help: [
@@ -228,7 +255,16 @@ const TEXT = {
     kindVoice: "Message vocal",
     kindAudio: "Audio",
     kindVideo: "Vidéo",
-    kindFile: "Fichier"
+    kindFile: "Fichier",
+    rateLimited: "Trop de requêtes en peu de temps. Attendez environ une minute puis réessayez.",
+    heavyRateLimited: "Trop de gros messages ou médias en peu de temps. Attendez environ une minute avant de continuer.",
+    textFileTooLarge: "Le fichier texte est trop volumineux pour être téléchargé via l’API Bot Telegram standard. getFile est limité à 20 Mo.",
+    documentTooLong: "Ce document est trop long pour une seule opération du bot. Limite publique : environ 300 000 caractères (jusqu’à 10 Rich Messages). Divisez-le en plusieurs documents.",
+    telegramFloodWait: "Telegram a temporairement limité la fréquence d’envoi. Attendez un peu puis réessayez.",
+    telegramFileError: "Telegram n’a pas pu utiliser l’un des fichiers. Renvoyez ce fichier au bot puis réessayez.",
+    telegramFormatError: "Telegram a refusé le format Rich Message. Vérifiez Markdown, notamment les blocs de code non fermés, tableaux, formules et blocs HTML.",
+    platformLimitError: "Une limite de Telegram Rich Message a été atteinte. Réduisez la taille d’une partie ou le nombre de médias.",
+    unexpectedError: "Une erreur inattendue s’est produite pendant la création du Rich Message. Réessayez ; si elle se répète, utilisez /help ou GitHub."
   },
   uk: {
     help: [
@@ -281,7 +317,16 @@ const TEXT = {
     kindVoice: "Голосове повідомлення",
     kindAudio: "Аудіо",
     kindVideo: "Відео",
-    kindFile: "Файл"
+    kindFile: "Файл",
+    rateLimited: "Забагато запитів за короткий час. Зачекайте приблизно хвилину й спробуйте ще раз.",
+    heavyRateLimited: "Забагато великих повідомлень або медіафайлів за короткий час. Зачекайте приблизно хвилину й продовжте.",
+    textFileTooLarge: "Текстовий файл завеликий для завантаження через стандартний Telegram Bot API. getFile підтримує до 20 МБ.",
+    documentTooLong: "Документ завеликий для однієї операції бота. Публічний ліміт — близько 300 000 символів (до 10 Rich Messages). Розділіть його на кілька документів.",
+    telegramFloodWait: "Telegram тимчасово обмежив частоту надсилання. Трохи зачекайте й повторіть спробу.",
+    telegramFileError: "Telegram не зміг використати один із файлів. Надішліть цей файл боту ще раз і повторіть спробу.",
+    telegramFormatError: "Telegram відхилив формат Rich Message. Перевірте Markdown, особливо незакриті блоки коду, таблиці, формули та HTML-блоки.",
+    platformLimitError: "Досягнуто ліміту Telegram Rich Message. Зменште розмір однієї частини або кількість медіа та спробуйте знову.",
+    unexpectedError: "Під час створення Rich Message сталася непередбачена помилка. Спробуйте ще раз; якщо вона повторюється, скористайтеся /help або GitHub."
   }
 };
 
