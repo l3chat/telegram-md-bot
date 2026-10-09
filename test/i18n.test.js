@@ -4,6 +4,7 @@ import {
   normalizeLocale,
   localeFromMessage,
   localeFromHelpCommand,
+  localeFromTestCommand,
   helpMarkdown,
   t,
 } from "../src/i18n.js";
@@ -39,4 +40,11 @@ test("service messages are localized", () => {
   assert.equal(t("de", "draftCleared"), "Entwurf gelöscht.");
   assert.equal(t("fr", "kindVideo"), "Vidéo");
   assert.equal(t("uk", "draftCleared"), "Чернетку очищено.");
+});
+
+
+test("explicit /test language overrides Telegram language", () => {
+  assert.equal(localeFromTestCommand("/test ru", "en"), "ru");
+  assert.equal(localeFromTestCommand("/test@tgMdFormatter_bot de", "fr"), "de");
+  assert.equal(localeFromTestCommand("/test", "uk"), "uk");
 });
