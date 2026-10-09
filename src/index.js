@@ -28,6 +28,13 @@ import {
 import {
   splitRichMessage,
 } from "./rich-split.js";
+import {
+  ensureBotProfile,
+} from "./bot-profile.js";
+import {
+  privacyMarkdown,
+  privacyHtml,
+} from "./privacy.js";
 
 async function tgCall(method, token, payload) {
   const url = `https://api.telegram.org/bot${token}/${method}`;
@@ -142,9 +149,18 @@ async function sendPreparedDraft(chatId, token, stub, session, markdown, locale)
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
     if (request.method === "GET") {
-      return new Response("tg-md-bot: OK split-v1");
+      if (url.pathname === "/privacy") {
+        const lang = url.searchParams.get("lang") || "en";
+        return new Response(privacyHtml(lang), {
+          headers: { "content-type": "text/html; charset=utf-8" },
+        });
+      }
+
+      return new Response("tg-md-bot: OK public-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
@@ -154,6 +170,14 @@ export default {
       if (!secret || secret !== env.WEBHOOK_SECRET) {
         return new Response("Forbidden", { status: 403 });
       }
+    }
+
+    if (ctx?.waitUntil) {
+      ctx.waitUntil(
+        ensureBotProfile(env.BOT_TOKEN).catch((error) => {
+          console.error("Failed to sync Telegram public profile", error);
+        })
+      );
     }
 
     const update = await request.json();
@@ -167,6 +191,17 @@ export default {
     if (isHelpCommand(message.text)) {
       const helpLocale = localeFromHelpCommand(message.text, locale);
       await sendMarkdown(chatId, helpMarkdown(helpLocale), env.BOT_TOKEN);
+      return new Response("OK");
+    }
+
+    if (isCommand(message.text, "privacy")) {
+      const publicUrl =
+        url.origin + "/privacy?lang=" + encodeURIComponent(locale);
+      await sendMarkdown(
+        chatId,
+        privacyMarkdown(locale, publicUrl),
+        env.BOT_TOKEN
+      );
       return new Response("OK");
     }
 
