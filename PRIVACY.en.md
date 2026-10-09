@@ -25,6 +25,10 @@ Draft state is deleted:
 
 Media binaries are **not copied into Durable Object storage**. Telegram-hosted file references are used instead.
 
+## Usage statistics
+
+For aggregate usage statistics (`/stats`), the bot stores only a salted SHA-256 hash of the user identifier together with the last-seen time for up to 30 days. Message content is not included in these statistics. Aggregate counters include incoming updates, Rich Messages, media events, and errors.
+
 ## Use of data
 
 Submitted content is not used for advertising, profiling, or model training.
