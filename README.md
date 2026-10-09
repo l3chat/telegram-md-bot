@@ -336,3 +336,24 @@ It verifies:
 - GPT-6.1 attribution and GitHub link on the public privacy page.
 
 The smoke workflow retries for several minutes so it can tolerate normal Cloudflare deployment delay.
+
+
+## Automatic album finalization
+
+Telegram albums arrive as several webhook updates. The bot now uses the per-user DraftSession Durable Object as a quiet-period coordinator.
+
+- every album item refreshes the draft;
+- if the album contains a caption/Markdown, a 2-second quiet timer is scheduled;
+- each later item moves that timer forward;
+- after the album becomes quiet, the bot automatically builds and sends the Rich Message;
+- if an album has no caption, send Markdown next and the existing media-first workflow completes it;
+- `/send` remains available as a manual fallback.
+
+## Webhook diagnostics
+
+The production Worker exposes two health endpoints:
+
+- `/health/telegram` — Telegram bot/webhook status;
+- `/health/webhook` — last minimal webhook-response diagnostic event.
+
+The diagnostic record intentionally excludes message text, file contents, and personal identifiers.
