@@ -97,7 +97,6 @@ export {
   telegramLanguageCode,
   publicBotConfig,
   syncBotProfile,
-  ensureBotProfile,
 };
 
 
@@ -175,16 +174,4 @@ async function syncBotProfile(token) {
   }
 
   return BOT_PUBLIC_CONFIG_VERSION;
-}
-
-let profileSyncPromise = null;
-
-function ensureBotProfile(token) {
-  if (!profileSyncPromise) {
-    profileSyncPromise = syncBotProfile(token).catch((error) => {
-      profileSyncPromise = null;
-      throw error;
-    });
-  }
-  return profileSyncPromise;
 }
