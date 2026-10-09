@@ -31,6 +31,7 @@ import {
 } from "./rich-split.js";
 import {
   ensureBotProfile,
+  syncBotProfile,
 } from "./bot-profile.js";
 import {
   privacyMarkdown,
@@ -366,6 +367,23 @@ export default {
         });
       } catch (error) {
         console.error("Ping failed", error);
+      }
+      return new Response("OK");
+    }
+
+    if (isCommand(message.text, "syncprofile")) {
+      try {
+        const version = await syncBotProfile(env.BOT_TOKEN);
+        await tgCall("sendMessage", env.BOT_TOKEN, {
+          chat_id: chatId,
+          text: "Profile synchronized: " + version,
+        });
+      } catch (error) {
+        console.error("Profile sync failed", error);
+        await tgCall("sendMessage", env.BOT_TOKEN, {
+          chat_id: chatId,
+          text: "Profile synchronization failed. Check Worker logs.",
+        }).catch(() => {});
       }
       return new Response("OK");
     }
