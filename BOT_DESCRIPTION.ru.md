@@ -1,6 +1,8 @@
-# Markdown Formatter
+# Markdown → Rich Message
 
-Telegram Markdown Formatter преобразует Markdown-текст и файлы в Telegram Rich Messages.
+**Telegram Markdown & Media Converter**
+
+Markdown → Rich Message преобразует Markdown-текст и файлы в Telegram Rich Messages.
 
 Поддерживаются длинные структурированные тексты, таблицы, код, цитаты, ссылки, формулы, фотографии, аудио, голосовые сообщения, видео и документы.
 
