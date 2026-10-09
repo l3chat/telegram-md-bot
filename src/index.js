@@ -54,6 +54,10 @@ import {
   trackStat,
   getStats,
 } from "./stats-store.js";
+import {
+  BOT_USERNAME,
+  landingHtml,
+} from "./landing.js";
 
 const MAX_TEXT_FILE_BYTES = 20 * 1024 * 1024;
 const MAX_RICH_MESSAGE_PARTS = 10;
@@ -202,6 +206,17 @@ function isHelpCommand(text) {
   return isCommand(text, ["start", "help"]);
 }
 
+function startSource(text) {
+  const match = String(text || "").trim().match(
+    /^\/start(?:@[A-Za-z0-9_]+)?(?:\s+([A-Za-z0-9_-]{1,32}))?\s*$/i
+  );
+  return match?.[1] ? match[1].toLowerCase() : null;
+}
+
+function shareUrl(source = "share") {
+  return "https://t.me/" + BOT_USERNAME + "?start=" + source;
+}
+
 function isMarkdownDocument(document) {
   return isMarkdownLikeDocument(document);
 }
@@ -227,7 +242,14 @@ async function downloadTelegramDocument(token, document) {
   return r.text();
 }
 
-async function sendMarkdown(chatId, markdown, token, media = [], stats = null) {
+async function sendMarkdown(
+  chatId,
+  markdown,
+  token,
+  media = [],
+  stats = null,
+  statsUserId = null
+) {
   if (!markdown?.trim()) return;
 
   const parts = splitRichMessage(markdown, media);
@@ -249,7 +271,7 @@ async function sendMarkdown(chatId, markdown, token, media = [], stats = null) {
             ? { markdown: part.markdown, media: part.media }
             : { markdown: part.markdown },
       });
-      await trackStat(stats, "rich_messages");
+      await trackStat(stats, "rich_messages", statsUserId);
       continue;
     } catch (error) {
       if (part.media.length > 0) throw error;
@@ -274,7 +296,16 @@ async function sendMarkdown(chatId, markdown, token, media = [], stats = null) {
   }
 }
 
-async function sendPreparedDraft(chatId, token, stub, session, markdown, locale, stats = null) {
+async function sendPreparedDraft(
+  chatId,
+  token,
+  stub,
+  session,
+  markdown,
+  locale,
+  stats = null,
+  statsUserId = null
+) {
   const prepared = prepareRichMarkdownMedia(markdown, session, {
     appendUnreferenced: true,
   });
@@ -300,7 +331,14 @@ async function sendPreparedDraft(chatId, token, stub, session, markdown, locale,
     return false;
   }
 
-  await sendMarkdown(chatId, prepared.markdown, token, prepared.media, stats);
+  await sendMarkdown(
+    chatId,
+    prepared.markdown,
+    token,
+    prepared.media,
+    stats,
+    statsUserId
+  );
   await clearDraftSession(stub);
   return true;
 }
@@ -310,6 +348,17 @@ export default {
     const url = new URL(request.url);
 
     if (request.method === "GET") {
+      if (url.pathname === "/" || url.pathname === "/home") {
+        const lang = url.searchParams.get("lang") || "en";
+        return new Response(landingHtml(lang), {
+          headers: { "content-type": "text/html; charset=utf-8" },
+        });
+      }
+
+      if (url.pathname === "/health") {
+        return new Response("tg-md-bot: OK promotion-v1");
+      }
+
       if (url.pathname === "/privacy") {
         const lang = url.searchParams.get("lang") || "en";
         return new Response(privacyHtml(lang), {
@@ -347,7 +396,7 @@ export default {
         }
       }
 
-      return new Response("tg-md-bot: OK stats-v1");
+      return new Response("Not found", { status: 404 });
     }
 
     if (request.method !== "POST") return new Response("OK");
@@ -366,6 +415,11 @@ export default {
 
     const userId = message?.from?.id || message?.chat?.id || null;
     await trackStat(env.STATS, "updates", userId);
+
+    const referralSource = startSource(message.text);
+    if (isCommand(message.text, "start")) {
+      await trackStat(env.STATS, "starts", userId, referralSource);
+    }
 
     if (isCommand(message.text, "ping")) {
       await putWebhookAudit(env.TEST_FIXTURES, { event: "ping_received" });
@@ -425,7 +479,34 @@ export default {
           t(locale, "statsErrors") + ": " + (stats.errors || 0),
           "",
           t(locale, "statsSince") + ": " + since,
+          "",
+          t(locale, "statsSources") + ":",
+          ...Object.entries(stats.sources || {})
+            .sort((a, b) => b[1].users - a[1].users)
+            .map(([source, row]) =>
+              source +
+              ": " +
+              row.users +
+              " / " +
+              row.rich_users +
+              " " +
+              t(locale, "statsConverted")
+            ),
         ].join("\n"),
+      });
+      return new Response("OK");
+    }
+
+    if (isCommand(message.text, "share")) {
+      await tgCall("sendMessage", env.BOT_TOKEN, {
+        chat_id: chatId,
+        text:
+          t(locale, "shareText") +
+          "\n\n" +
+          shareUrl("share") +
+          "\n\n" +
+          t(locale, "shareHint"),
+        disable_web_page_preview: false,
       });
       return new Response("OK");
     }
@@ -468,7 +549,14 @@ export default {
     if (isHelpCommand(message.text)) {
       const helpLocale = localeFromHelpCommand(message.text, locale);
       try {
-        await sendMarkdown(chatId, helpMarkdown(helpLocale), env.BOT_TOKEN, [], env.STATS);
+        await sendMarkdown(
+          chatId,
+          helpMarkdown(helpLocale),
+          env.BOT_TOKEN,
+          [],
+          env.STATS,
+          userId
+        );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
       }
@@ -484,7 +572,8 @@ export default {
           privacyMarkdown(locale, publicUrl),
           env.BOT_TOKEN,
           [],
-          env.STATS
+          env.STATS,
+          userId
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -508,7 +597,8 @@ export default {
             { id: "test_audio", media: { type: "audio", media: fixtures.audio } },
             { id: "test_video", media: { type: "video", media: fixtures.video } },
           ],
-          env.STATS
+          env.STATS,
+          userId
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -554,7 +644,8 @@ export default {
           session,
           session.markdown,
           locale,
-          env.STATS
+          env.STATS,
+          userId
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -598,6 +689,7 @@ export default {
           locale,
           media_group_id: nextSession.media_group_id,
           revision: nextSession.revision,
+          user_id: userId,
         });
       }
 
@@ -610,7 +702,8 @@ export default {
             nextSession,
             message.caption,
             locale,
-            env.STATS
+            env.STATS,
+            userId
           );
         } catch (error) {
           await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -675,7 +768,8 @@ export default {
           currentSession,
           markdown,
           locale,
-          env.STATS
+          env.STATS,
+          userId
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -684,7 +778,14 @@ export default {
     }
 
     try {
-      await sendMarkdown(chatId, markdown, env.BOT_TOKEN, [], env.STATS);
+      await sendMarkdown(
+        chatId,
+        markdown,
+        env.BOT_TOKEN,
+        [],
+        env.STATS,
+        userId
+      );
     } catch (error) {
       await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
     }
@@ -700,6 +801,8 @@ export {
   splitTelegramWithEntities,
   isCommand,
   isHelpCommand,
+  startSource,
+  shareUrl,
   isMarkdownDocument,
   sendMarkdown,
   sendPreparedDraft,
