@@ -25,6 +25,10 @@ Les brouillons sont supprimés :
 
 Les fichiers médias eux-mêmes ne sont **pas copiés dans Durable Objects**. Le bot utilise des références de fichiers hébergés par Telegram.
 
+## Usage statistics
+
+Pour les statistiques agrégées (`/stats`), le bot conserve uniquement un hachage SHA-256 salé de l’identifiant utilisateur et la dernière activité pendant 30 jours au maximum. Le contenu des messages n’est pas inclus. Les compteurs agrégés couvrent les mises à jour reçues, les Rich Messages, les médias et les erreurs.
+
 ## Utilisation des données
 
 Le contenu envoyé n’est pas utilisé pour la publicité, le profilage ou l’entraînement de modèles.
