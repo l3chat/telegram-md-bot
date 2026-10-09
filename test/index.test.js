@@ -4,6 +4,7 @@ import {
   markdownToEntities,
   splitTelegramWithEntities,
 } from "../src/format.js";
+import { startSource, shareUrl } from "../src/index.js";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -59,4 +60,19 @@ test("manual test content matches expected entities output", () => {
 
   const actual = markdownToEntities(md);
   assert.deepEqual(actual, expected);
+});
+
+
+test("Telegram start payload extracts referral source", () => {
+  assert.equal(startSource("/start website"), "website");
+  assert.equal(startSource("/start@tgMdFormatter_bot reddit"), "reddit");
+  assert.equal(startSource("/start"), null);
+  assert.equal(startSource("/start bad value"), null);
+});
+
+test("share URL uses stable bot username and referral payload", () => {
+  assert.equal(
+    shareUrl("share"),
+    "https://t.me/tgMdFormatter_bot?start=share"
+  );
 });
