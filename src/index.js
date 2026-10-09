@@ -25,6 +25,7 @@ import {
   setDraftMarkdown,
   touchDraftSession,
   replaceDraftSession,
+  scheduleAlbumFinalize,
 } from "./draft-session.js";
 import {
   splitRichMessage,
@@ -44,6 +45,8 @@ import {
 } from "./test-media-page.js";
 import {
   TestFixtureStore,
+  putWebhookAudit,
+  getWebhookAudit,
   getOrCreateTestFixtures,
 } from "./test-fixture-store.js";
 
@@ -307,6 +310,10 @@ export default {
         });
       }
 
+      if (url.pathname === "/health/webhook") {
+        return Response.json(await getWebhookAudit(env.TEST_FIXTURES));
+      }
+
       if (url.pathname === "/health/telegram") {
         try {
           const me = await tgCall("getMe", env.BOT_TOKEN, {});
@@ -333,7 +340,7 @@ export default {
         }
       }
 
-      return new Response("tg-md-bot: OK recovery-v1");
+      return new Response("tg-md-bot: OK album-auto-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
@@ -351,13 +358,18 @@ export default {
     if (!message || !chatId) return new Response("OK");
 
     if (isCommand(message.text, "ping")) {
+      await putWebhookAudit(env.TEST_FIXTURES, { event: "ping_received" });
       try {
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
           text: "pong",
         });
+        await putWebhookAudit(env.TEST_FIXTURES, { event: "ping_sent" });
       } catch (error) {
         console.error("Ping failed", error);
+        await putWebhookAudit(env.TEST_FIXTURES, {
+          event: "ping_send_failed",
+        });
       }
       return new Response("OK");
     }
@@ -533,6 +545,19 @@ export default {
           message.caption,
           message
         );
+      }
+
+      if (
+        message.media_group_id &&
+        nextSession.markdown &&
+        env.DRAFT_SESSIONS
+      ) {
+        await scheduleAlbumFinalize(draftStub, {
+          chat_id: chatId,
+          locale,
+          media_group_id: nextSession.media_group_id,
+          revision: nextSession.revision,
+        });
       }
 
       if (message.caption?.trim() && !message.media_group_id) {
