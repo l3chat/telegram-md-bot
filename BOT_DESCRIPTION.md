@@ -7,3 +7,6 @@ Drafts are stored temporarily in Cloudflare Durable Objects and expire automatic
 UI languages: English, Russian, German, French and Ukrainian.
 
 Live bot: @tgMdFormatter_bot
+
+Built with GPT-6.1.
+GitHub: https://github.com/l3chat/telegram-md-bot
