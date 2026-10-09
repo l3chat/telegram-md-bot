@@ -17,6 +17,7 @@ const PROFILE = {
       { command: "send", description: "Build and send the current draft" },
       { command: "clear", description: "Discard the current draft" },
       { command: "privacy", description: "Privacy and temporary storage" },
+      { command: "stats", description: "Show bot usage statistics" },
     ],
   },
   ru: {
@@ -32,6 +33,7 @@ const PROFILE = {
       { command: "send", description: "Собрать и отправить текущий черновик" },
       { command: "clear", description: "Удалить текущий черновик" },
       { command: "privacy", description: "Конфиденциальность и хранение данных" },
+      { command: "stats", description: "Показать статистику использования" },
     ],
   },
   de: {
@@ -47,6 +49,7 @@ const PROFILE = {
       { command: "send", description: "Aktuellen Entwurf erstellen und senden" },
       { command: "clear", description: "Aktuellen Entwurf löschen" },
       { command: "privacy", description: "Datenschutz und temporäre Speicherung" },
+      { command: "stats", description: "Nutzungsstatistik anzeigen" },
     ],
   },
   fr: {
@@ -62,6 +65,7 @@ const PROFILE = {
       { command: "send", description: "Construire et envoyer le brouillon" },
       { command: "clear", description: "Supprimer le brouillon actuel" },
       { command: "privacy", description: "Confidentialité et stockage temporaire" },
+      { command: "stats", description: "Afficher les statistiques d’utilisation" },
     ],
   },
   uk: {
@@ -77,6 +81,7 @@ const PROFILE = {
       { command: "send", description: "Зібрати й надіслати поточну чернетку" },
       { command: "clear", description: "Видалити поточну чернетку" },
       { command: "privacy", description: "Конфіденційність і зберігання даних" },
+      { command: "stats", description: "Показати статистику використання" },
     ],
   },
 };
