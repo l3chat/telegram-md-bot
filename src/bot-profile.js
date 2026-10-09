@@ -91,4 +91,80 @@ export {
   PROFILE,
   telegramLanguageCode,
   publicBotConfig,
+  syncBotProfile,
+  ensureBotProfile,
 };
+
+
+async function telegramApiCall(method, token, payload) {
+  const response = await fetch(
+    "https://api.telegram.org/bot" + token + "/" + method,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+  const data = await response.json();
+  if (!data.ok) {
+    throw new Error(method + " failed: " + JSON.stringify(data));
+  }
+  return data;
+}
+
+async function syncBotProfile(token) {
+  if (!token) throw new Error("BOT_TOKEN is not configured");
+
+  const applyLocale = async (locale, includeLanguageCode = true) => {
+    const config = publicBotConfig(locale);
+    const language_code = includeLanguageCode
+      ? telegramLanguageCode(locale) || locale
+      : undefined;
+
+    const withLanguage = (payload) =>
+      language_code ? { ...payload, language_code } : payload;
+
+    await telegramApiCall(
+      "setMyCommands",
+      token,
+      withLanguage({ commands: config.commands })
+    );
+    await telegramApiCall(
+      "setMyName",
+      token,
+      withLanguage({ name: config.name })
+    );
+    await telegramApiCall(
+      "setMyShortDescription",
+      token,
+      withLanguage({ short_description: config.shortDescription })
+    );
+    await telegramApiCall(
+      "setMyDescription",
+      token,
+      withLanguage({ description: config.description })
+    );
+  };
+
+  // English is also the default profile for users whose Telegram language is
+  // not explicitly localized by this bot.
+  await applyLocale(DEFAULT_LOCALE, false);
+
+  for (const locale of PUBLIC_LOCALES) {
+    await applyLocale(locale, true);
+  }
+
+  return BOT_PUBLIC_CONFIG_VERSION;
+}
+
+let profileSyncPromise = null;
+
+function ensureBotProfile(token) {
+  if (!profileSyncPromise) {
+    profileSyncPromise = syncBotProfile(token).catch((error) => {
+      profileSyncPromise = null;
+      throw error;
+    });
+  }
+  return profileSyncPromise;
+}
