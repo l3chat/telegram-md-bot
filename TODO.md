@@ -23,10 +23,10 @@
 
 ## Before wider public release
 
-- [ ] Register localized Telegram command menus with BotFather / Bot API
-- [ ] Add localized bot name / short description / description
-- [ ] Add `/privacy`
-- [ ] Publish a privacy notice
+- [x] Register localized Telegram command menus with Bot API
+- [x] Add localized bot name / short description / description
+- [x] Add `/privacy`
+- [x] Publish a privacy notice
 - [ ] Add rate limiting / abuse protection
 - [ ] Add clearer platform-limit error messages
 - [ ] Add production smoke test after deployment
