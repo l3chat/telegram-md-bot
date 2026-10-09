@@ -1,4 +1,4 @@
-const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v1";
+const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v2";
 
 const DEFAULT_LOCALE = "en";
 const PUBLIC_LOCALES = ["en", "ru", "de", "fr", "uk"];
@@ -7,11 +7,12 @@ const PROFILE = {
   en: {
     name: "Markdown Formatter",
     shortDescription:
-      "Turn Markdown, images and audio into structured Telegram Rich Messages.",
+      "Turn Markdown, images and audio into Rich Messages. Built with GPT-6.1.",
     description:
-      "Convert Markdown text or files into Telegram Rich Messages. Add photos, audio, video and documents; the bot links media automatically, keeps temporary drafts for up to 24 hours, and splits oversized documents into multiple Rich Messages.",
+      "Convert Markdown text or files into Telegram Rich Messages. Add photos, audio, video and documents; media are linked automatically and long documents are split safely. Built with GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "How to use the bot" },
+      { command: "test", description: "Show the Rich Message Test Page" },
       { command: "media", description: "Show media in the current draft" },
       { command: "send", description: "Build and send the current draft" },
       { command: "clear", description: "Discard the current draft" },
@@ -21,11 +22,12 @@ const PROFILE = {
   ru: {
     name: "Форматтер Markdown",
     shortDescription:
-      "Превращает Markdown, изображения и аудио в Telegram Rich Messages.",
+      "Markdown, изображения и аудио → Rich Messages. Сделано с GPT-6.1.",
     description:
-      "Преобразует Markdown-текст и файлы в Telegram Rich Messages. Можно добавлять фото, аудио, видео и документы: бот сам связывает медиа, хранит черновик не более 24 часов и автоматически разбивает слишком длинные документы.",
+      "Преобразует Markdown и медиа в Telegram Rich Messages, автоматически связывает файлы и разбивает длинные документы. Сделано с помощью GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Как пользоваться ботом" },
+      { command: "test", description: "Показать тестовую Rich Message страницу" },
       { command: "media", description: "Показать медиа текущего черновика" },
       { command: "send", description: "Собрать и отправить текущий черновик" },
       { command: "clear", description: "Удалить текущий черновик" },
@@ -35,11 +37,12 @@ const PROFILE = {
   de: {
     name: "Markdown-Formatierer",
     shortDescription:
-      "Erstellt aus Markdown, Bildern und Audio Telegram Rich Messages.",
+      "Markdown, Bilder und Audio → Rich Messages. Erstellt mit GPT-6.1.",
     description:
-      "Wandelt Markdown-Text und Dateien in Telegram Rich Messages um. Fotos, Audio, Video und Dokumente werden automatisch verknüpft. Entwürfe bleiben höchstens 24 Stunden gespeichert; zu lange Dokumente werden automatisch aufgeteilt.",
+      "Wandelt Markdown und Medien in Telegram Rich Messages um, verknüpft Dateien automatisch und teilt lange Dokumente sicher auf. Erstellt mit GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Hilfe zur Benutzung" },
+      { command: "test", description: "Rich-Message-Testseite anzeigen" },
       { command: "media", description: "Medien im aktuellen Entwurf anzeigen" },
       { command: "send", description: "Aktuellen Entwurf erstellen und senden" },
       { command: "clear", description: "Aktuellen Entwurf löschen" },
@@ -49,11 +52,12 @@ const PROFILE = {
   fr: {
     name: "Formateur Markdown",
     shortDescription:
-      "Transforme Markdown, images et audio en Rich Messages Telegram.",
+      "Markdown, images et audio → Rich Messages. Créé avec GPT-6.1.",
     description:
-      "Transforme du texte ou des fichiers Markdown en Rich Messages Telegram. Photos, audio, vidéo et documents sont reliés automatiquement. Les brouillons sont conservés au plus 24 h et les documents trop longs sont découpés automatiquement.",
+      "Transforme Markdown et les médias en Rich Messages Telegram, relie les fichiers automatiquement et découpe les longs documents. Créé avec GPT-6.1. GitHub : https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Mode d’emploi du bot" },
+      { command: "test", description: "Afficher la page de test Rich Message" },
       { command: "media", description: "Afficher les médias du brouillon" },
       { command: "send", description: "Construire et envoyer le brouillon" },
       { command: "clear", description: "Supprimer le brouillon actuel" },
@@ -63,11 +67,12 @@ const PROFILE = {
   uk: {
     name: "Форматувач Markdown",
     shortDescription:
-      "Перетворює Markdown, зображення й аудіо на Telegram Rich Messages.",
+      "Markdown, зображення й аудіо → Rich Messages. Створено з GPT-6.1.",
     description:
-      "Перетворює Markdown-текст і файли на Telegram Rich Messages. Фото, аудіо, відео та документи прив’язуються автоматично. Чернетки зберігаються не більше 24 годин, а надто довгі документи автоматично розбиваються.",
+      "Перетворює Markdown і медіа на Telegram Rich Messages, автоматично пов’язує файли та ділить довгі документи. Створено за допомогою GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Як користуватися ботом" },
+      { command: "test", description: "Показати тестову сторінку Rich Message" },
       { command: "media", description: "Показати медіа поточної чернетки" },
       { command: "send", description: "Зібрати й надіслати поточну чернетку" },
       { command: "clear", description: "Видалити поточну чернетку" },
