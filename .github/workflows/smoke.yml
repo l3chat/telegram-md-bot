@@ -52,3 +52,12 @@ jobs:
           PAGE="$(curl -fsS --max-time 15 "https://tg-md-bot.lechat-reg.workers.dev/privacy?lang=de")"
 
           echo "$PAGE" | grep -q "Datenschutz"
+
+
+      - name: Check Telegram webhook diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          JSON="$(curl -fsS --max-time 15 "https://tg-md-bot.lechat-reg.workers.dev/health/telegram")"
+          echo "$JSON"
+          echo "$JSON" | grep -q '"ok":true'
