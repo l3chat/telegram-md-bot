@@ -25,6 +25,10 @@ Entwürfe werden gelöscht:
 
 Mediendateien selbst werden **nicht in Durable Objects kopiert**. Verwendet werden Telegram-Dateireferenzen.
 
+## Usage statistics
+
+Für aggregierte Nutzungsstatistiken (`/stats`) speichert der Bot nur einen gesalzenen SHA-256-Hash der Benutzerkennung und den letzten Aktivitätszeitpunkt für höchstens 30 Tage. Nachrichteninhalte werden dabei nicht gespeichert. Aggregierte Zähler umfassen eingehende Updates, Rich Messages, Medienereignisse und Fehler.
+
 ## Nutzung der Daten
 
 Eingesandte Inhalte werden nicht für Werbung, Profiling oder Modelltraining verwendet.
