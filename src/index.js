@@ -35,6 +35,9 @@ import {
   privacyMarkdown,
   privacyHtml,
 } from "./privacy.js";
+import {
+  testPageMarkdown,
+} from "./test-page.js";
 
 async function tgCall(method, token, payload) {
   const url = `https://api.telegram.org/bot${token}/${method}`;
@@ -160,7 +163,7 @@ export default {
         });
       }
 
-      return new Response("tg-md-bot: OK public-v1");
+      return new Response("tg-md-bot: OK test-page-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
@@ -200,6 +203,15 @@ export default {
       await sendMarkdown(
         chatId,
         privacyMarkdown(locale, publicUrl),
+        env.BOT_TOKEN
+      );
+      return new Response("OK");
+    }
+
+    if (isCommand(message.text, "test")) {
+      await sendMarkdown(
+        chatId,
+        testPageMarkdown(locale),
         env.BOT_TOKEN
       );
       return new Response("OK");
