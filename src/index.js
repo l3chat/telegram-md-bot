@@ -5,6 +5,7 @@ import {
 import {
   localeFromMessage,
   localeFromHelpCommand,
+  localeFromTestCommand,
   t,
   helpMarkdown,
 } from "./i18n.js";
@@ -436,9 +437,10 @@ export default {
           env.TEST_FIXTURES,
           chatId
         );
+        const testLocale = localeFromTestCommand(message.text, locale);
         await sendMarkdown(
           chatId,
-          testPageWithMedia(locale),
+          testPageWithMedia(testLocale),
           env.BOT_TOKEN,
           [
             { id: "test_photo", media: { type: "photo", media: fixtures.photo } },
