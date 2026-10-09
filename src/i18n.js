@@ -42,11 +42,11 @@ const TEXT = {
       "",
       "Если Telegram отправляет альбом частями, после последнего элемента используйте `/send`.",
       "",
-      "Команды: `/media` — показать ожидающие медиа, `/send` — собрать текущий черновик, `/clear` — очистить черновик, `/privacy` — конфиденциальность, `/help` — подсказка.",
+      "Команды: `/test` — тестовая страница, `/media` — показать ожидающие медиа, `/send` — собрать текущий черновик, `/clear` — очистить черновик, `/privacy` — конфиденциальность, `/help` — подсказка.",
       "",
       "Другой язык: `/help en`, `/help de`, `/help fr`, `/help uk`, `/help ru`.",
       "",
-      "> Внутренние `tg://...` ссылки пользователь писать не должен — их строит бот."
+      "> Внутренние `tg://...` ссылки пользователь писать не должен — их строит бот.\n\nСделано с помощью **GPT-6.1**. [GitHub](https://github.com/l3chat/telegram-md-bot)"
     ].join("\n"),
     draftCleared: "Черновик очищен.",
     storageMissing: "Хранилище черновиков пока недоступно.",
@@ -95,11 +95,11 @@ const TEXT = {
       "",
       "If Telegram sends an album as separate updates, use `/send` after the last item.",
       "",
-      "Commands: `/media` — show pending media, `/send` — build the current draft, `/clear` — clear the draft, `/privacy` — privacy, `/help` — show help.",
+      "Commands: `/test` — Test Page, `/media` — show pending media, `/send` — build the current draft, `/clear` — clear the draft, `/privacy` — privacy, `/help` — show help.",
       "",
       "Other languages: `/help ru`, `/help de`, `/help fr`, `/help uk`, `/help en`.",
       "",
-      "> You never need to write internal `tg://...` links yourself — the bot creates them."
+      "> You never need to write internal `tg://...` links yourself — the bot creates them.\n\nBuilt with **GPT-6.1**. [GitHub](https://github.com/l3chat/telegram-md-bot)"
     ].join("\n"),
     draftCleared: "Draft cleared.",
     storageMissing: "Draft storage is currently unavailable.",
@@ -148,11 +148,11 @@ const TEXT = {
       "",
       "Wenn Telegram ein Album in mehreren Updates liefert, nach dem letzten Element `/send` senden.",
       "",
-      "Befehle: `/media` — wartende Medien anzeigen, `/send` — aktuellen Entwurf erstellen, `/clear` — Entwurf löschen, `/privacy` — Datenschutz, `/help` — Hilfe.",
+      "Befehle: `/test` — Testseite, `/media` — wartende Medien anzeigen, `/send` — aktuellen Entwurf erstellen, `/clear` — Entwurf löschen, `/privacy` — Datenschutz, `/help` — Hilfe.",
       "",
       "Andere Sprache: `/help ru`, `/help en`, `/help fr`, `/help uk`, `/help de`.",
       "",
-      "> Interne `tg://...`-Links müssen nie von Hand geschrieben werden — der Bot erzeugt sie."
+      "> Interne `tg://...`-Links müssen nie von Hand geschrieben werden — der Bot erzeugt sie.\n\nErstellt mit **GPT-6.1**. [GitHub](https://github.com/l3chat/telegram-md-bot)"
     ].join("\n"),
     draftCleared: "Entwurf gelöscht.",
     storageMissing: "Der Entwurfsspeicher ist derzeit nicht verfügbar.",
@@ -201,11 +201,11 @@ const TEXT = {
       "",
       "Si Telegram envoie un album en plusieurs mises à jour, utilisez `/send` après le dernier élément.",
       "",
-      "Commandes : `/media` — afficher les médias en attente, `/send` — construire le brouillon actuel, `/clear` — effacer le brouillon, `/privacy` — confidentialité, `/help` — aide.",
+      "Commandes : `/test` — page de test, `/media` — afficher les médias en attente, `/send` — construire le brouillon actuel, `/clear` — effacer le brouillon, `/privacy` — confidentialité, `/help` — aide.",
       "",
       "Autre langue : `/help ru`, `/help en`, `/help de`, `/help uk`, `/help fr`.",
       "",
-      "> Vous n’avez jamais besoin d’écrire les liens internes `tg://...` vous-même — le bot les crée."
+      "> Vous n’avez jamais besoin d’écrire les liens internes `tg://...` vous-même — le bot les crée.\n\nCréé avec **GPT-6.1**. [GitHub](https://github.com/l3chat/telegram-md-bot)"
     ].join("\n"),
     draftCleared: "Brouillon effacé.",
     storageMissing: "Le stockage des brouillons est actuellement indisponible.",
@@ -254,11 +254,11 @@ const TEXT = {
       "",
       "Якщо Telegram надсилає альбом частинами, після останнього елемента використайте `/send`.",
       "",
-      "Команди: `/media` — показати медіа, що очікують, `/send` — зібрати поточну чернетку, `/clear` — очистити чернетку, `/privacy` — конфіденційність, `/help` — довідка.",
+      "Команди: `/test` — тестова сторінка, `/media` — показати медіа, що очікують, `/send` — зібрати поточну чернетку, `/clear` — очистити чернетку, `/privacy` — конфіденційність, `/help` — довідка.",
       "",
       "Інша мова: `/help ru`, `/help en`, `/help de`, `/help fr`, `/help uk`.",
       "",
-      "> Внутрішні посилання `tg://...` не потрібно писати вручну — бот створює їх сам."
+      "> Внутрішні посилання `tg://...` не потрібно писати вручну — бот створює їх сам.\n\nСтворено за допомогою **GPT-6.1**. [GitHub](https://github.com/l3chat/telegram-md-bot)"
     ].join("\n"),
     draftCleared: "Чернетку очищено.",
     storageMissing: "Сховище чернеток зараз недоступне.",
