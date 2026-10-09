@@ -174,6 +174,19 @@ export class TestFixtureStore {
       return Response.json({ ok: true });
     }
 
+    if (action === "audit-put") {
+      const body = await request.json().catch(() => ({}));
+      await this.state.storage.put("audit", {
+        ...body,
+        stored_at: new Date().toISOString(),
+      });
+      return Response.json({ ok: true });
+    }
+
+    if (action === "audit-get") {
+      return Response.json((await this.state.storage.get("audit")) || {});
+    }
+
     return new Response("Not found", { status: 404 });
   }
 }
@@ -181,6 +194,26 @@ export class TestFixtureStore {
 function fixtureStoreStub(namespace) {
   if (!namespace) throw new Error("TEST_FIXTURES binding is not configured");
   return namespace.get(namespace.idFromName("global-test-fixtures"));
+}
+
+async function putWebhookAudit(namespace, data) {
+  try {
+    const stub = fixtureStoreStub(namespace);
+    await stub.fetch("https://fixtures/audit-put", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(data),
+    });
+  } catch (error) {
+    console.error("Could not store webhook audit", error);
+  }
+}
+
+async function getWebhookAudit(namespace) {
+  const stub = fixtureStoreStub(namespace);
+  const response = await stub.fetch("https://fixtures/audit-get");
+  if (!response.ok) return {};
+  return response.json();
 }
 
 async function getOrCreateTestFixtures(namespace, chatId) {
@@ -200,5 +233,7 @@ export {
   FIXTURE_VERSION,
   FIXTURE_URLS,
   fixtureStoreStub,
+  putWebhookAudit,
+  getWebhookAudit,
   getOrCreateTestFixtures,
 };
