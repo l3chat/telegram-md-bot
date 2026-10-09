@@ -301,7 +301,33 @@ export default {
         });
       }
 
-      return new Response("tg-md-bot: OK hardened-v1");
+      if (url.pathname === "/health/telegram") {
+        try {
+          const me = await tgCall("getMe", env.BOT_TOKEN, {});
+          const webhook = await tgCall("getWebhookInfo", env.BOT_TOKEN, {});
+          return Response.json({
+            ok: true,
+            bot: {
+              id: me.result?.id,
+              username: me.result?.username,
+            },
+            webhook: {
+              url_set: Boolean(webhook.result?.url),
+              pending_update_count: webhook.result?.pending_update_count || 0,
+              last_error_date: webhook.result?.last_error_date || null,
+              last_error_message: webhook.result?.last_error_message || null,
+            },
+          });
+        } catch (error) {
+          console.error("Telegram health check failed", error);
+          return Response.json(
+            { ok: false, error: String(error?.message || error) },
+            { status: 503 }
+          );
+        }
+      }
+
+      return new Response("tg-md-bot: OK webhook-diag-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
