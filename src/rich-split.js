@@ -83,7 +83,7 @@ function splitFencedCode(block, limit) {
   if (!info) return null;
 
   const wrapperCost = richLength(info.opening) + richLength("\n" + info.closing);
-  const bodyLimit = Math.max(1000, limit - wrapperCost - 16);
+  const bodyLimit = Math.max(64, limit - wrapperCost - 16);
   const bodyParts = splitByLines(info.body, bodyLimit);
 
   return bodyParts.map(
@@ -155,7 +155,7 @@ function splitRichMarkdown(markdown, limit = DEFAULT_RICH_MESSAGE_LIMIT) {
   if (!markdown?.trim()) return [];
 
   const safeLimit = Math.min(
-    Math.max(1000, Number(limit) || DEFAULT_RICH_MESSAGE_LIMIT),
+    Math.max(256, Number(limit) || DEFAULT_RICH_MESSAGE_LIMIT),
     TELEGRAM_RICH_MESSAGE_LIMIT
   );
 
@@ -171,6 +171,13 @@ function splitRichMarkdown(markdown, limit = DEFAULT_RICH_MESSAGE_LIMIT) {
   };
 
   const append = (block) => {
+    // When a long document has explicit top-level sections, keep a new H1/H2
+    // with the content that follows it instead of squeezing the heading into
+    // the end of the previous Rich Message.
+    if (current && /^#{1,2}\s+/.test(block)) {
+      flush();
+    }
+
     const candidate = current ? current + "\n\n" + block : block;
     if (richLength(candidate) <= safeLimit) {
       current = candidate;
