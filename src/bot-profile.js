@@ -1,4 +1,4 @@
-const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v5";
+const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v6";
 
 const DEFAULT_LOCALE = "en";
 const PUBLIC_LOCALES = ["en", "ru", "de", "fr", "uk"];
