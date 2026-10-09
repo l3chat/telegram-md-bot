@@ -1,3 +1,5 @@
+[English](README.md) · [Русский](README.ru.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Українська](README.uk.md)
+
 # Telegram Markdown Formatter Bot
 
 A public Telegram bot that turns Markdown into a **single Telegram Rich Message**.
@@ -261,3 +263,30 @@ Active development.
 Current production architecture:
 
 **Rich Messages + Durable Objects + automatic media linking + five UI languages.**
+
+
+## Localized documentation
+
+### README
+
+- [English](README.md)
+- [Русский](README.ru.md)
+- [Deutsch](README.de.md)
+- [Français](README.fr.md)
+- [Українська](README.uk.md)
+
+### Privacy
+
+- [English](PRIVACY.en.md)
+- [Русский](PRIVACY.ru.md)
+- [Deutsch](PRIVACY.de.md)
+- [Français](PRIVACY.fr.md)
+- [Українська](PRIVACY.uk.md)
+
+### Bot description
+
+- [English](BOT_DESCRIPTION.md)
+- [Русский](BOT_DESCRIPTION.ru.md)
+- [Deutsch](BOT_DESCRIPTION.de.md)
+- [Français](BOT_DESCRIPTION.fr.md)
+- [Українська](BOT_DESCRIPTION.uk.md)
