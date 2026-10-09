@@ -20,7 +20,13 @@ async function telegramApiCall(method, token, payload) {
   return data;
 }
 
-async function finalizeAlbumDraft(token, chatId, session, stats = null) {
+async function finalizeAlbumDraft(
+  token,
+  chatId,
+  session,
+  stats = null,
+  statsUserId = null
+) {
   const prepared = prepareRichMarkdownMedia(session.markdown, session, {
     appendUnreferenced: true,
   });
@@ -45,7 +51,7 @@ async function finalizeAlbumDraft(token, chatId, session, stats = null) {
           ? { markdown: part.markdown, media: part.media }
           : { markdown: part.markdown },
     });
-    await trackStat(stats, "rich_messages");
+    await trackStat(stats, "rich_messages", statsUserId);
   }
 }
 
