@@ -25,6 +25,9 @@ import {
   touchDraftSession,
   replaceDraftSession,
 } from "./draft-session.js";
+import {
+  splitRichMessage,
+} from "./rich-split.js";
 
 async function tgCall(method, token, payload) {
   const url = `https://api.telegram.org/bot${token}/${method}`;
@@ -72,27 +75,38 @@ async function downloadTelegramDocument(token, document) {
 async function sendMarkdown(chatId, markdown, token, media = []) {
   if (!markdown?.trim()) return;
 
-  try {
-    await tgCall("sendRichMessage", token, {
-      chat_id: chatId,
-      rich_message: media.length > 0 ? { markdown, media } : { markdown },
-    });
-    return;
-  } catch (error) {
-    if (media.length > 0) throw error;
-    console.warn("sendRichMessage failed; falling back to sendMessage", error);
-  }
+  const parts = splitRichMessage(markdown, media);
 
-  const { text: outText, entities: outEntities } = markdownToEntities(markdown);
-  if (!outText) return;
+  for (const part of parts) {
+    try {
+      await tgCall("sendRichMessage", token, {
+        chat_id: chatId,
+        rich_message:
+          part.media.length > 0
+            ? { markdown: part.markdown, media: part.media }
+            : { markdown: part.markdown },
+      });
+      continue;
+    } catch (error) {
+      if (part.media.length > 0) throw error;
+      console.warn(
+        "sendRichMessage failed for chunk; falling back to sendMessage",
+        error
+      );
+    }
 
-  for (const chunk of splitTelegramWithEntities(outText, outEntities)) {
-    await tgCall("sendMessage", token, {
-      chat_id: chatId,
-      text: chunk.text,
-      entities: chunk.entities,
-      disable_web_page_preview: true,
-    });
+    const { text: outText, entities: outEntities } =
+      markdownToEntities(part.markdown);
+    if (!outText) continue;
+
+    for (const chunk of splitTelegramWithEntities(outText, outEntities)) {
+      await tgCall("sendMessage", token, {
+        chat_id: chatId,
+        text: chunk.text,
+        entities: chunk.entities,
+        disable_web_page_preview: true,
+      });
+    }
   }
 }
 
@@ -130,7 +144,7 @@ async function sendPreparedDraft(chatId, token, stub, session, markdown, locale)
 export default {
   async fetch(request, env) {
     if (request.method === "GET") {
-      return new Response("tg-md-bot: OK durable-v1");
+      return new Response("tg-md-bot: OK split-v1");
     }
 
     if (request.method !== "POST") return new Response("OK");
