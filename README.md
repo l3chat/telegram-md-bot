@@ -1,6 +1,8 @@
 [English](README.md) · [Русский](README.ru.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Українська](README.uk.md)
 
-# Telegram Markdown Formatter Bot
+# Markdown → Rich Message
+
+**Telegram Markdown & Media Converter**
 
 A public Telegram bot that turns Markdown into a **single Telegram Rich Message**.
 
