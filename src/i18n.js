@@ -85,6 +85,15 @@ const TEXT = {
     telegramFileError: "Telegram не смог использовать один из файлов. Пришлите этот файл боту ещё раз и повторите попытку.",
     telegramFormatError: "Telegram отклонил формат Rich Message. Проверьте Markdown, особенно незакрытые блоки кода, таблицы, формулы и HTML-блоки.",
     platformLimitError: "Достигнут лимит Telegram Rich Message. Уменьшите размер одной части или количество медиа и попробуйте снова.",
+    statsTitle: "Статистика бота",
+    statsDAU: "Сегодня (DAU)",
+    statsWAU: "7 дней",
+    statsMAU: "30 дней (MAU)",
+    statsUpdates: "Входящие update",
+    statsRich: "Rich Messages",
+    statsMedia: "Медиа",
+    statsErrors: "Ошибки",
+    statsSince: "Статистика с",
     unexpectedError: "Произошла непредвиденная ошибка при создании Rich Message. Попробуйте ещё раз; если ошибка повторяется, используйте /help или GitHub."
   },
   en: {
@@ -147,6 +156,15 @@ const TEXT = {
     telegramFileError: "Telegram could not use one of the files. Send that file to the bot again and retry.",
     telegramFormatError: "Telegram rejected the Rich Message format. Check the Markdown, especially unclosed code fences, tables, formulas and HTML blocks.",
     platformLimitError: "A Telegram Rich Message platform limit was reached. Reduce the size of one part or the number of media items and try again.",
+    statsTitle: "Bot statistics",
+    statsDAU: "Today (DAU)",
+    statsWAU: "7 days",
+    statsMAU: "30 days (MAU)",
+    statsUpdates: "Incoming updates",
+    statsRich: "Rich Messages",
+    statsMedia: "Media",
+    statsErrors: "Errors",
+    statsSince: "Statistics since",
     unexpectedError: "An unexpected error occurred while building the Rich Message. Try again; if it repeats, use /help or GitHub."
   },
   de: {
@@ -209,6 +227,15 @@ const TEXT = {
     telegramFileError: "Telegram konnte eine Datei nicht verwenden. Sende diese Datei erneut an den Bot und wiederhole den Vorgang.",
     telegramFormatError: "Telegram hat das Rich-Message-Format abgelehnt. Prüfe Markdown, besonders nicht geschlossene Codeblöcke, Tabellen, Formeln und HTML-Blöcke.",
     platformLimitError: "Ein Telegram-Rich-Message-Limit wurde erreicht. Verkleinere eine Teilnachricht oder reduziere die Anzahl der Medien.",
+    statsTitle: "Bot-Statistik",
+    statsDAU: "Heute (DAU)",
+    statsWAU: "7 Tage",
+    statsMAU: "30 Tage (MAU)",
+    statsUpdates: "Eingehende Updates",
+    statsRich: "Rich Messages",
+    statsMedia: "Medien",
+    statsErrors: "Fehler",
+    statsSince: "Statistik seit",
     unexpectedError: "Beim Erstellen der Rich Message ist ein unerwarteter Fehler aufgetreten. Versuche es erneut; bei Wiederholung nutze /help oder GitHub."
   },
   fr: {
@@ -271,6 +298,15 @@ const TEXT = {
     telegramFileError: "Telegram n’a pas pu utiliser l’un des fichiers. Renvoyez ce fichier au bot puis réessayez.",
     telegramFormatError: "Telegram a refusé le format Rich Message. Vérifiez Markdown, notamment les blocs de code non fermés, tableaux, formules et blocs HTML.",
     platformLimitError: "Une limite de Telegram Rich Message a été atteinte. Réduisez la taille d’une partie ou le nombre de médias.",
+    statsTitle: "Statistiques du bot",
+    statsDAU: "Aujourd’hui (DAU)",
+    statsWAU: "7 jours",
+    statsMAU: "30 jours (MAU)",
+    statsUpdates: "Mises à jour reçues",
+    statsRich: "Rich Messages",
+    statsMedia: "Médias",
+    statsErrors: "Erreurs",
+    statsSince: "Statistiques depuis",
     unexpectedError: "Une erreur inattendue s’est produite pendant la création du Rich Message. Réessayez ; si elle se répète, utilisez /help ou GitHub."
   },
   uk: {
@@ -333,6 +369,15 @@ const TEXT = {
     telegramFileError: "Telegram не зміг використати один із файлів. Надішліть цей файл боту ще раз і повторіть спробу.",
     telegramFormatError: "Telegram відхилив формат Rich Message. Перевірте Markdown, особливо незакриті блоки коду, таблиці, формули та HTML-блоки.",
     platformLimitError: "Досягнуто ліміту Telegram Rich Message. Зменште розмір однієї частини або кількість медіа та спробуйте знову.",
+    statsTitle: "Статистика бота",
+    statsDAU: "Сьогодні (DAU)",
+    statsWAU: "7 днів",
+    statsMAU: "30 днів (MAU)",
+    statsUpdates: "Вхідні update",
+    statsRich: "Rich Messages",
+    statsMedia: "Медіа",
+    statsErrors: "Помилки",
+    statsSince: "Статистика з",
     unexpectedError: "Під час створення Rich Message сталася непередбачена помилка. Спробуйте ще раз; якщо вона повторюється, скористайтеся /help або GitHub."
   }
 };
