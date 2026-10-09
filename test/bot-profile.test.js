@@ -16,7 +16,7 @@ test("public bot profile exists in all supported languages", () => {
     assert.ok(config.description.includes("GPT-6.1"));
     assert.deepEqual(
       config.commands.map((x) => x.command),
-      ["help", "test", "media", "send", "clear", "privacy", "stats"]
+      ["help", "test", "media", "send", "clear", "privacy", "stats", "share"]
     );
   }
 });
