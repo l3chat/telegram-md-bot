@@ -49,6 +49,11 @@ import {
   getWebhookAudit,
   getOrCreateTestFixtures,
 } from "./test-fixture-store.js";
+import {
+  StatsStore,
+  trackStat,
+  getStats,
+} from "./stats-store.js";
 
 const MAX_TEXT_FILE_BYTES = 20 * 1024 * 1024;
 const MAX_RICH_MESSAGE_PARTS = 10;
@@ -120,8 +125,9 @@ function errorMessageKey(error) {
   return "unexpectedError";
 }
 
-async function sendLocalizedError(chatId, token, locale, error) {
+async function sendLocalizedError(chatId, token, locale, error, stats = null) {
   console.error("User-facing bot error", error);
+  await trackStat(stats, "errors");
   try {
     await tgCall("sendMessage", token, {
       chat_id: chatId,
@@ -221,7 +227,7 @@ async function downloadTelegramDocument(token, document) {
   return r.text();
 }
 
-async function sendMarkdown(chatId, markdown, token, media = []) {
+async function sendMarkdown(chatId, markdown, token, media = [], stats = null) {
   if (!markdown?.trim()) return;
 
   const parts = splitRichMessage(markdown, media);
@@ -243,6 +249,7 @@ async function sendMarkdown(chatId, markdown, token, media = []) {
             ? { markdown: part.markdown, media: part.media }
             : { markdown: part.markdown },
       });
+      await trackStat(stats, "rich_messages");
       continue;
     } catch (error) {
       if (part.media.length > 0) throw error;
@@ -267,7 +274,7 @@ async function sendMarkdown(chatId, markdown, token, media = []) {
   }
 }
 
-async function sendPreparedDraft(chatId, token, stub, session, markdown, locale) {
+async function sendPreparedDraft(chatId, token, stub, session, markdown, locale, stats = null) {
   const prepared = prepareRichMarkdownMedia(markdown, session, {
     appendUnreferenced: true,
   });
@@ -293,7 +300,7 @@ async function sendPreparedDraft(chatId, token, stub, session, markdown, locale)
     return false;
   }
 
-  await sendMarkdown(chatId, prepared.markdown, token, prepared.media);
+  await sendMarkdown(chatId, prepared.markdown, token, prepared.media, stats);
   await clearDraftSession(stub);
   return true;
 }
@@ -357,6 +364,9 @@ export default {
     const chatId = message?.chat?.id;
     if (!message || !chatId) return new Response("OK");
 
+    const userId = message?.from?.id || message?.chat?.id || null;
+    await trackStat(env.STATS, "updates", userId);
+
     if (isCommand(message.text, "ping")) {
       await putWebhookAudit(env.TEST_FIXTURES, { event: "ping_received" });
       try {
@@ -394,6 +404,32 @@ export default {
     }
 
     const locale = localeFromMessage(message);
+
+    if (isCommand(message.text, "stats")) {
+      const stats = await getStats(env.STATS);
+      const since = stats.since
+        ? new Date(stats.since).toISOString().slice(0, 10)
+        : "-";
+      await tgCall("sendMessage", env.BOT_TOKEN, {
+        chat_id: chatId,
+        text: [
+          t(locale, "statsTitle"),
+          "",
+          t(locale, "statsDAU") + ": " + (stats.dau || 0),
+          t(locale, "statsWAU") + ": " + (stats.wau || 0),
+          t(locale, "statsMAU") + ": " + (stats.mau || 0),
+          "",
+          t(locale, "statsUpdates") + ": " + (stats.updates || 0),
+          t(locale, "statsRich") + ": " + (stats.rich_messages || 0),
+          t(locale, "statsMedia") + ": " + (stats.media || 0),
+          t(locale, "statsErrors") + ": " + (stats.errors || 0),
+          "",
+          t(locale, "statsSince") + ": " + since,
+        ].join("\n"),
+      });
+      return new Response("OK");
+    }
+
     const draftStub = draftSessionStub(env.DRAFT_SESSIONS, message);
     const limiterKey = rateLimitKey(message);
 
@@ -446,7 +482,9 @@ export default {
         await sendMarkdown(
           chatId,
           privacyMarkdown(locale, publicUrl),
-          env.BOT_TOKEN
+          env.BOT_TOKEN,
+          [],
+          env.STATS
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error);
@@ -526,6 +564,7 @@ export default {
     const incomingMedia = detectIncomingMedia(message, currentSession);
 
     if (incomingMedia) {
+      await trackStat(env.STATS, "media");
       if (!env.DRAFT_SESSIONS) {
         await tgCall("sendMessage", env.BOT_TOKEN, {
           chat_id: chatId,
