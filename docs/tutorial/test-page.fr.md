@@ -8,9 +8,9 @@ Paragraphe normal avec **gras**, *italique*, ~~barré~~ et `code inline`.
 
 ## 1. Titres
 
-### H3
+### Titre niveau 3
 
-#### H4
+#### Titre niveau 4
 
 ## 2. Listes
 
@@ -41,12 +41,11 @@ Envoyez d’abord `184273.png` au bot.
 
 ## 4. Tableau
 
-| Fonction | État |
-|---|:---:|
-| Markdown | ✅ |
-| Tableaux | ✅ |
-| Code | ✅ |
-| Médias | ✅ |
+|Test|✓|
+|---|---|
+|Markdown|✓|
+|Tableau|✓|
+|Médias|✓|
 
 ## 5. Code
 
@@ -107,5 +106,9 @@ Le bot crée automatiquement les références média internes de Telegram.
 # Fin du test
 
 Créé avec **GPT-6.1**.
+
+[Voir la source du tutoriel](https://github.com/l3chat/telegram-md-bot/blob/main/docs/tutorial/test-page.fr.md)
+
+[Markdown brut](https://raw.githubusercontent.com/l3chat/telegram-md-bot/main/docs/tutorial/test-page.fr.md)
 
 [Dépôt GitHub](https://github.com/l3chat/telegram-md-bot)
