@@ -8,9 +8,9 @@
 
 ## 1. Заголовки
 
-### H3
+### Заголовок третьего уровня
 
-#### H4
+#### Заголовок четвёртого уровня
 
 ## 2. Списки
 
@@ -41,12 +41,11 @@
 
 ## 4. Таблица
 
-| Возможность | Статус |
-|---|:---:|
-| Markdown | ✅ |
-| Таблицы | ✅ |
-| Код | ✅ |
-| Медиа | ✅ |
+|Тест|✓|
+|---|---|
+|Markdown|✓|
+|Таблица|✓|
+|Медиа|✓|
 
 ## 5. Код
 
@@ -107,5 +106,9 @@ $$
 # Конец теста
 
 Бот создан с помощью **GPT-6.1**.
+
+[Открыть исходник tutorial](https://github.com/l3chat/telegram-md-bot/blob/main/docs/tutorial/test-page.ru.md)
+
+[Raw Markdown](https://raw.githubusercontent.com/l3chat/telegram-md-bot/main/docs/tutorial/test-page.ru.md)
 
 [Репозиторий GitHub](https://github.com/l3chat/telegram-md-bot)
