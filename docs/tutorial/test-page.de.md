@@ -8,9 +8,9 @@ Normaler Absatz mit **Fettdruck**, *Kursivschrift*, ~~Durchstreichung~~ und `Inl
 
 ## 1. Überschriften
 
-### H3
+### Überschrift Ebene 3
 
-#### H4
+#### Überschrift Ebene 4
 
 ## 2. Listen
 
@@ -41,12 +41,11 @@ Zuerst `184273.png` an den Bot senden.
 
 ## 4. Tabelle
 
-| Funktion | Status |
-|---|:---:|
-| Markdown | ✅ |
-| Tabellen | ✅ |
-| Code | ✅ |
-| Medien | ✅ |
+|Test|✓|
+|---|---|
+|Markdown|✓|
+|Tabelle|✓|
+|Medien|✓|
 
 ## 5. Code
 
@@ -107,5 +106,9 @@ Der Bot erzeugt die internen Telegram-Medienverweise automatisch.
 # Ende des Tests
 
 Erstellt mit **GPT-6.1**.
+
+[Tutorial-Quelltext ansehen](https://github.com/l3chat/telegram-md-bot/blob/main/docs/tutorial/test-page.de.md)
+
+[Raw Markdown](https://raw.githubusercontent.com/l3chat/telegram-md-bot/main/docs/tutorial/test-page.de.md)
 
 [GitHub-Repository](https://github.com/l3chat/telegram-md-bot)
