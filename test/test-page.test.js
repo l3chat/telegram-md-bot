@@ -10,7 +10,7 @@ test("Test Page exists in all five languages", () => {
     const page = testPageMarkdown(locale);
     assert.ok(page.includes("GPT-6.1"));
     assert.ok(page.includes("https://github.com/l3chat/telegram-md-bot"));
-    assert.ok(page.includes("| Feature | Status |"));
+    assert.ok(page.includes("|"));
     assert.ok(page.includes("```python"));
     assert.ok(page.includes("<details>"));
     assert.ok(page.length > 700);
@@ -46,4 +46,17 @@ test("Test Page media are distributed through the document", () => {
   assert.ok(photo > -1 && photo < quote);
   assert.ok(audio > quote && audio < math);
   assert.ok(video > math && video < mediaSyntax);
+});
+
+
+test("localized lists and compact tables are used", () => {
+  const ru = testPageMarkdown("ru");
+  assert.ok(ru.includes("1. один"));
+  assert.ok(ru.includes("|Тест|✓|"));
+  assert.ok(!ru.includes("| Возможность | Статус |"));
+  assert.ok(ru.includes("184273.png"));
+  assert.ok(ru.includes("ding-dong-01.mp3"));
+  assert.ok(ru.includes("numbers-01.mp4"));
+  assert.ok(ru.includes("github.com/l3chat/telegram-md-bot/blob/main/docs/tutorial/test-page.ru.md"));
+  assert.ok(ru.includes("raw.githubusercontent.com/l3chat/telegram-md-bot/main/docs/tutorial/test-page.ru.md"));
 });
