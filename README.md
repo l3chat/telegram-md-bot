@@ -4,9 +4,15 @@
 
 **Telegram Markdown & Media Converter**
 
-A public Telegram bot that turns Markdown into a **single Telegram Rich Message**.
+[Open @tgMdFormatter_bot in Telegram](https://t.me/tgMdFormatter_bot) · [Landing page](https://miniapps.lechat-reg.workers.dev/markdown-rich-message/) · [Markdown tutorial](docs/tutorial/test-page.en.md)
 
-Live bot: **@tgMdFormatter_bot**
+![Markdown to Telegram Rich Message demo](https://raw.githubusercontent.com/l3chat/miniApps/main/markdown-rich-message/demo.svg)
+
+Write Markdown, send it to Telegram, and get a polished **Rich Message** with long text, tables, formulas and media.
+
+**Try it now:** open the bot and send `/test en` for a live demonstration.
+
+A public Telegram bot that turns Markdown into structured Telegram Rich Messages.
 
 Built with **GPT-6.1** · Source: https://github.com/l3chat/telegram-md-bot
 
@@ -407,3 +413,11 @@ The first recorded source is retained with the privacy-preserving active-user re
 - how many of them have successfully created at least one Rich Message.
 
 No cookies, browser fingerprinting, message contents, or raw Telegram user IDs are used for attribution.
+
+
+## Promotion assets
+
+- Landing page: https://miniapps.lechat-reg.workers.dev/markdown-rich-message/
+- Telegram bot: https://t.me/tgMdFormatter_bot
+- Live tutorial: send `/test en` (or `ru/de/fr/uk`) to the bot
+- Visual demo source: https://github.com/l3chat/miniApps/tree/main/markdown-rich-message
