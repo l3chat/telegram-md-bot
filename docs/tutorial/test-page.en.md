@@ -8,9 +8,9 @@ Normal paragraph with **bold**, *italic*, ~~strikethrough~~ and `inline code`.
 
 ## 1. Headings
 
-### H3
+### Level 3 heading
 
-#### H4
+#### Level 4 heading
 
 ## 2. Lists
 
@@ -41,12 +41,11 @@ Before sending this Markdown to the bot, send `184273.png`.
 
 ## 4. Table
 
-| Feature | Status |
-|---|:---:|
-| Markdown | ✅ |
-| Tables | ✅ |
-| Code | ✅ |
-| Media | ✅ |
+|Test|✓|
+|---|---|
+|Markdown|✓|
+|Table|✓|
+|Media|✓|
 
 ## 5. Code
 
@@ -107,5 +106,9 @@ The bot replaces file names with internal Telegram media references automaticall
 # End of test
 
 Built with **GPT-6.1**.
+
+[View tutorial source](https://github.com/l3chat/telegram-md-bot/blob/main/docs/tutorial/test-page.en.md)
+
+[Raw Markdown](https://raw.githubusercontent.com/l3chat/telegram-md-bot/main/docs/tutorial/test-page.en.md)
 
 [GitHub repository](https://github.com/l3chat/telegram-md-bot)
