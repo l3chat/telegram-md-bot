@@ -1,4 +1,4 @@
-const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v7";
+const BOT_PUBLIC_CONFIG_VERSION = "public-profile-v8";
 
 const DEFAULT_LOCALE = "en";
 const PUBLIC_LOCALES = ["en", "ru", "de", "fr", "uk"];
@@ -9,7 +9,7 @@ const PROFILE = {
     shortDescription:
       "Telegram Markdown & Media Converter — Markdown → Rich Messages. Built with GPT-6.1.",
     description:
-      "Markdown → Rich Message. Telegram Markdown & Media Converter for text, .md files and media. Long text is split automatically at ~30,000 characters per Rich Message, up to 10 parts (~300,000 characters) per operation. Up to 50 media items. Built with GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Converts Markdown, .md files and text with photos, audio and video into Telegram Rich Messages. Supports headings, lists, tables, code and formulas. Long text is split automatically. EN/RU/DE/FR/UK. Built with GPT-6.1. GitHub: github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "How to use the bot" },
       { command: "test", description: "Show the Rich Message Test Page" },
@@ -26,7 +26,7 @@ const PROFILE = {
     shortDescription:
       "Telegram Markdown & Media Converter — Markdown и медиа → Rich Messages. GPT-6.1.",
     description:
-      "Markdown → Rich Message. Telegram Markdown & Media Converter для текста, .md и медиа. Длинный текст автоматически делится примерно по 30 000 символов на Rich Message; максимум 10 частей (~300 000 символов) за операцию и до 50 медиа. Сделано с помощью GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Преобразует Markdown, .md-файлы и текст с фото, аудио и видео в Telegram Rich Messages. Поддерживает заголовки, списки, таблицы, код и формулы. Длинный текст делится автоматически. RU/EN/DE/FR/UK. GPT-6.1. GitHub: github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Как пользоваться ботом" },
       { command: "test", description: "Показать тестовую Rich Message страницу" },
@@ -43,7 +43,7 @@ const PROFILE = {
     shortDescription:
       "Telegram Markdown & Media Converter — Markdown und Medien → Rich Messages. GPT-6.1.",
     description:
-      "Markdown → Rich Message. Telegram Markdown & Media Converter für Text, .md und Medien. Lange Texte werden automatisch bei ca. 30.000 Zeichen pro Rich Message geteilt; max. 10 Teile (~300.000 Zeichen) pro Vorgang und bis zu 50 Medien. Erstellt mit GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Wandelt Markdown, .md-Dateien und Text mit Fotos, Audio und Video in Telegram Rich Messages um. Unterstützt Überschriften, Listen, Tabellen, Code und Formeln. Lange Texte werden automatisch geteilt. EN/RU/DE/FR/UK. GPT-6.1. GitHub: github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Hilfe zur Benutzung" },
       { command: "test", description: "Rich-Message-Testseite anzeigen" },
@@ -60,7 +60,7 @@ const PROFILE = {
     shortDescription:
       "Telegram Markdown & Media Converter — Markdown et médias → Rich Messages. GPT-6.1.",
     description:
-      "Markdown → Rich Message. Telegram Markdown & Media Converter pour texte, .md et médias. Les longs textes sont découpés automatiquement à env. 30 000 caractères par Rich Message ; max. 10 parties (~300 000 caractères) par opération et 50 médias. Créé avec GPT-6.1. GitHub : https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Convertit Markdown, fichiers .md et texte avec photos, audio et vidéo en Telegram Rich Messages. Prend en charge titres, listes, tableaux, code et formules. Les longs textes sont découpés automatiquement. EN/RU/DE/FR/UK. GPT-6.1. GitHub: github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Mode d’emploi du bot" },
       { command: "test", description: "Afficher la page de test Rich Message" },
@@ -77,7 +77,7 @@ const PROFILE = {
     shortDescription:
       "Telegram Markdown & Media Converter — Markdown і медіа → Rich Messages. GPT-6.1.",
     description:
-      "Markdown → Rich Message. Telegram Markdown & Media Converter для тексту, .md і медіа. Довгий текст автоматично ділиться приблизно по 30 000 символів на Rich Message; максимум 10 частин (~300 000 символів) за операцію та до 50 медіа. Створено за допомогою GPT-6.1. GitHub: https://github.com/l3chat/telegram-md-bot",
+      "Markdown → Rich Message. Перетворює Markdown, .md-файли й текст із фото, аудіо та відео на Telegram Rich Messages. Підтримує заголовки, списки, таблиці, код і формули. Довгий текст ділиться автоматично. EN/RU/DE/FR/UK. GPT-6.1. GitHub: github.com/l3chat/telegram-md-bot",
     commands: [
       { command: "help", description: "Як користуватися ботом" },
       { command: "test", description: "Показати тестову сторінку Rich Message" },
