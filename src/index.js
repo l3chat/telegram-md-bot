@@ -31,6 +31,7 @@ import {
   splitRichMessage,
 } from "./rich-split.js";
 import {
+  BOT_PUBLIC_CONFIG_VERSION,
   syncBotProfile,
 } from "./bot-profile.js";
 import {
@@ -59,6 +60,7 @@ import {
   landingHtml,
 } from "./landing.js";
 
+const BOT_BUILD_VERSION = "worker-v1";
 const MAX_TEXT_FILE_BYTES = 20 * 1024 * 1024;
 const MAX_RICH_MESSAGE_PARTS = 10;
 
@@ -356,7 +358,7 @@ export default {
       }
 
       if (url.pathname === "/health") {
-        return new Response("tg-md-bot: OK promotion-v1");
+        return new Response("tg-md-bot: OK " + BOT_BUILD_VERSION);
       }
 
       if (url.pathname === "/privacy") {
@@ -458,6 +460,20 @@ export default {
     }
 
     const locale = localeFromMessage(message);
+
+    if (isCommand(message.text, "version")) {
+      await tgCall("sendMessage", env.BOT_TOKEN, {
+        chat_id: chatId,
+        text: [
+          t(locale, "versionTitle"),
+          "",
+          t(locale, "versionProfile") + ": " + BOT_PUBLIC_CONFIG_VERSION,
+          t(locale, "versionBuild") + ": " + BOT_BUILD_VERSION,
+          "@" + BOT_USERNAME,
+        ].join("\n"),
+      });
+      return new Response("OK");
+    }
 
     if (isCommand(message.text, "stats")) {
       const stats = await getStats(env.STATS);
