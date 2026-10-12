@@ -417,6 +417,8 @@ No cookies, browser fingerprinting, message contents, or raw Telegram user IDs a
 
 ## Promotion assets
 
+Ready-to-publish launch copy and channel-specific templates: [PROMOTION.md](PROMOTION.md)
+
 - Landing page: https://miniapps.lechat-reg.workers.dev/markdown-rich-message/
 - Telegram bot: https://t.me/tgMdFormatter_bot
 - Live tutorial: send `/test en` (or `ru/de/fr/uk`) to the bot
