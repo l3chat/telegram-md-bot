@@ -3,10 +3,27 @@ import assert from "node:assert/strict";
 import {
   markdownToEntities,
   splitTelegramWithEntities,
+  applyEntitiesToMarkdown,
 } from "../src/format.js";
 import { startSource, shareUrl } from "../src/index.js";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
+test("Telegram bold entity is restored to Rich Markdown", () => {
+  const text = "This is bold";
+  const markdown = applyEntitiesToMarkdown(text, [
+    { type: "bold", offset: 8, length: 4 },
+  ]);
+  assert.equal(markdown, "This is **bold**");
+});
+
+test("Telegram caption entities are restored the same way", () => {
+  const text = "photo caption";
+  const markdown = applyEntitiesToMarkdown(text, [
+    { type: "italic", offset: 6, length: 7 },
+  ]);
+  assert.equal(markdown, "photo *caption*");
+});
 
 test("bold and italics formatting survive inside lists", () => {
   const input = "- **bold**\n- __bold__";
