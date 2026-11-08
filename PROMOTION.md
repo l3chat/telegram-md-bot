@@ -282,3 +282,12 @@ The most useful early signals are:
 - whether users discover and use `/test`.
 
 Avoid optimizing for raw update count alone; one user can generate many Telegram updates.
+
+
+## Long-document behavior
+
+The bot targets about **30,000 characters per Rich Message** and splits longer Markdown at structural boundaries. A single operation is limited to **10 Rich Messages**. The often-mentioned “~300,000 characters” value is only an approximation, not a fixed character threshold: headings, fenced code, math blocks, details blocks, and other structure can affect how many parts are needed.
+
+Top-level headings no longer force a new Rich Message by themselves; the splitter prefers a new part before a heading only when the current part is already substantially filled.
+
+This behavior is especially relevant when testing `.md/.markdown/.txt` files with many short sections.
