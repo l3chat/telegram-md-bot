@@ -2,6 +2,10 @@
 
 ## Completed
 
+- [x] Preserve Telegram rich-text entities in incoming text and captions
+- [x] Improve long-document splitting for heading-heavy Markdown
+- [x] Clarify 10-part vs. approximate character limits
+
 - [x] Markdown → Telegram Rich Message
 - [x] Plain-text / entities fallback for failed simple Rich Messages
 - [x] Accept Markdown as text
