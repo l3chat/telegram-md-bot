@@ -171,10 +171,16 @@ function splitRichMarkdown(markdown, limit = DEFAULT_RICH_MESSAGE_LIMIT) {
   };
 
   const append = (block) => {
-    // When a long document has explicit top-level sections, keep a new H1/H2
-    // with the content that follows it instead of squeezing the heading into
-    // the end of the previous Rich Message.
-    if (current && /^#{1,2}\s+/.test(block)) {
+    // Prefer to keep a top-level heading with the following section, but do
+    // not force every H1/H2 to start a new Rich Message. Otherwise documents
+    // with many short sections can exceed the part-count limit even when the
+    // total text is small. Start a fresh chunk only when the current one is
+    // already substantially filled.
+    if (
+      current &&
+      /^#{1,2}\s+/.test(block) &&
+      richLength(current) >= Math.floor(safeLimit * 0.75)
+    ) {
       flush();
     }
 
