@@ -1,6 +1,7 @@
 import {
   markdownToEntities,
   splitTelegramWithEntities,
+  applyEntitiesToMarkdown,
 } from "./format.js";
 import {
   localeFromMessage,
@@ -738,7 +739,11 @@ export default {
       return new Response("OK");
     }
 
-    let markdown = message.text;
+    let markdown = message.text
+      ? applyEntitiesToMarkdown(message.text, message.entities)
+      : message.caption
+        ? applyEntitiesToMarkdown(message.caption, message.caption_entities)
+        : message.text;
 
     if (!markdown && message.document) {
       if (!isMarkdownDocument(message.document)) {
