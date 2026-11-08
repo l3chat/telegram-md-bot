@@ -279,7 +279,7 @@ Telegram Rich Messages have platform limits, including message size and media co
 
 ## Status
 
-Active development.
+Active development. Recent fixes and milestones are tracked in [CHANGELOG.md](CHANGELOG.md).
 
 Current production architecture:
 
