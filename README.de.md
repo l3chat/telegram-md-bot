@@ -61,12 +61,15 @@ Wenn `photo.jpg` vorher gesendet wurde, wird es genau an dieser Stelle eingefüg
 - `/send` — aktuellen Entwurf erstellen und senden
 - `/clear` — Entwurf löschen
 - `/privacy` — Datenschutz
+- `/stats` — Nutzungsstatistik
+- `/version` — Worker- und Profilversion
+- `/share` — Link zum Teilen
 
 Die Sprache wird automatisch aus Telegram `language_code` gewählt.
 
 ## Öffentlicher Telegram-Auftritt
 
-Der Worker synchronisiert über die Bot API automatisch:
+Das öffentliche Telegram-Profil wird manuell mit dem versteckten Befehl `/syncprofile` synchronisiert. Die automatische Synchronisierung ist absichtlich deaktiviert, um Telegram-Rate-Limits für Profiländerungen zu vermeiden:
 
 - lokalisierte Befehlsmenüs;
 - Bot-Namen;
@@ -101,7 +104,7 @@ Für jedes Chat-/Benutzerpaar gibt es ein eigenes Durable Object. Gespeichert we
 
 ## Grenzen
 
-Der Bot verwendet ungefähr **30.000 Zeichen** als sichere Zielgröße pro Rich Message und teilt längere Dokumente automatisch. Medien werden nur an den Teil angehängt, der sie referenziert. Pro vorbereitetem Dokument sind derzeit höchstens **50 Medienelemente** vorgesehen.
+Der Bot verwendet ungefähr **30.000 Zeichen** als sichere Zielgröße pro Rich Message und teilt längere Dokumente an strukturellen Markdown-Grenzen. Überschriften `#` und `##` erzwingen nicht mehr automatisch einen neuen Teil; bevorzugt wird dort nur getrennt, wenn der aktuelle Teil bereits weitgehend gefüllt ist. Pro Vorgang sind höchstens **10 Rich Messages** erlaubt. Das entspricht oft ungefähr 300.000 Zeichen, ist aber **kein starres Zeichenlimit**: die Dokumentstruktur kann die Zahl der Teile beeinflussen. Pro vorbereitetem Dokument sind derzeit höchstens **50 Medienelemente** vorgesehen.
 
 ## Demo
 
@@ -131,7 +134,7 @@ Cloudflare-Secrets:
 Health Check:
 
 ```text
-tg-md-bot: OK test-page-v1
+tg-md-bot: OK worker-v1
 ```
 
 ## Status
