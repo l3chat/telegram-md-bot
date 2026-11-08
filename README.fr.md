@@ -61,12 +61,15 @@ Si `photo.jpg` a été envoyé auparavant, il sera placé exactement ici. Les m�
 - `/send` — construire et envoyer le brouillon
 - `/clear` — supprimer le brouillon
 - `/privacy` — confidentialité
+- `/stats` — statistiques d’utilisation
+- `/version` — versions du Worker et du profil
+- `/share` — lien à partager
 
 La langue est choisie automatiquement via Telegram `language_code`.
 
 ## Profil Telegram public
 
-Le Worker synchronise automatiquement via la Bot API :
+Le profil Telegram public est synchronisé manuellement avec la commande cachée `/syncprofile`. La synchronisation automatique est volontairement désactivée afin d’éviter les limites de fréquence de Telegram pour les modifications de profil :
 
 - le menu de commandes localisé ;
 - le nom du bot ;
@@ -101,7 +104,7 @@ Un Durable Object séparé est utilisé pour chaque paire discussion/utilisateur
 
 ## Limites
 
-Le bot utilise environ **30 000 caractères** comme taille cible sûre par Rich Message et découpe automatiquement les documents plus longs. Les médias restent associés à la partie qui les référence. Limite actuelle : **50 médias** par document préparé.
+Le bot utilise environ **30 000 caractères** comme taille cible sûre par Rich Message et découpe les documents plus longs aux frontières structurelles Markdown. Les titres `#` et `##` ne déclenchent plus automatiquement une nouvelle partie ; une coupure avant un titre est privilégiée seulement lorsque la partie courante est déjà largement remplie. Une opération est limitée à **10 Rich Messages**. Cela correspond souvent à environ 300 000 caractères, mais **ce n’est pas une limite stricte en nombre de caractères** : la structure du document peut modifier le nombre de parties. Limite actuelle : **50 médias** par document préparé.
 
 ## Démonstration
 
@@ -131,7 +134,7 @@ Secrets Cloudflare :
 Health check :
 
 ```text
-tg-md-bot: OK test-page-v1
+tg-md-bot: OK worker-v1
 ```
 
 ## Statut
