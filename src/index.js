@@ -691,7 +691,7 @@ export default {
       if (message.caption?.trim()) {
         nextSession = await setDraftMarkdown(
           draftStub,
-          message.caption,
+          applyEntitiesToMarkdown(message.caption, message.caption_entities),
           message
         );
       }
