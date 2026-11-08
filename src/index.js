@@ -261,7 +261,10 @@ async function sendMarkdown(
     throw new BotOperationError(
       "DOCUMENT_TOO_LONG",
       "Document would produce " + parts.length + " Rich Messages",
-      { parts: parts.length }
+      {
+        parts: parts.length,
+        characters: Array.from(String(markdown || "")).length,
+      }
     );
   }
 
