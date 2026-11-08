@@ -86,6 +86,7 @@ A single photo can be sent together with a Markdown caption. The bot uses the ca
 - `/clear` — discard the current draft
 - `/privacy` — show the localized privacy notice and public privacy-page link
 - `/stats` — show DAU, 7-day users, MAU, updates, Rich Messages, media, errors and referral sources
+- `/version` — show Worker build and public-profile version
 - `/share` — get a tracked share link
 - `/test` — print the localized Rich Message Test Page directly in the bot chat
 
@@ -93,7 +94,7 @@ The bot automatically chooses the UI language from Telegram's `language_code`; u
 
 ## Public Telegram profile
 
-The Worker automatically synchronizes the bot's public Telegram configuration through the Bot API after deployment/first webhook activity:
+The bot's public Telegram profile is synchronized manually with the hidden `/syncprofile` command. Automatic profile synchronization is intentionally disabled to avoid Telegram Bot API profile-update rate limits:
 
 - localized command menus;
 - localized display name;
@@ -233,7 +234,7 @@ Open the Worker URL in a browser.
 Current build returns:
 
 ```text
-tg-md-bot: OK hardened-v1
+tg-md-bot: OK worker-v1
 ```
 
 ## Demo document
@@ -274,7 +275,7 @@ CI runs automatically on pushes and pull requests to `main`.
 
 ## Current limits
 
-Telegram Rich Messages have platform limits, including message size and media count. The bot uses a conservative ~30,000-character target and automatically splits longer Markdown at structural boundaries where possible. Fenced code blocks are reopened/closed when a single code block itself must be split. Media are attached only to the chunk that references them. The bot currently enforces a maximum of **50 media items** in one prepared document.
+Telegram Rich Messages have platform limits, including message size and media count. The bot uses a conservative ~30,000-character target per Rich Message and automatically splits longer Markdown at structural boundaries where possible. It avoids creating a new part at every heading; H1/H2 boundaries are preferred only when the current part is already substantially filled. A single operation is capped at **10 Rich Messages**. This is usually around 300,000 characters, but it is **not a hard character limit**: document structure can affect the number of generated parts. Fenced code blocks are reopened/closed when a single code block itself must be split. Media are attached only to the chunk that references them. The bot currently enforces a maximum of **50 media items** in one prepared document.
 
 ## Status
 
@@ -322,7 +323,7 @@ The public Worker includes three protection layers:
 
 The standard Telegram Bot API can download files via `getFile` only up to **20 MB**, so oversized text files are rejected with a localized explanation before download.
 
-A single bot operation is limited to **10 Rich Messages** (roughly 300,000 characters at the normal split target). This prevents one request from creating an excessive burst of outgoing Telegram messages.
+A single bot operation is limited to **10 Rich Messages**. At the normal ~30,000-character target this is often around 300,000 characters, but 300,000 is only an approximation, not a fixed document-size threshold. Structural constraints can change the number of parts.
 
 Telegram/API failures are mapped to localized actionable messages for:
 
