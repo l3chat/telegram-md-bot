@@ -31,7 +31,7 @@ test("explicit /help language overrides Telegram language", () => {
 test("help exists in all five languages", () => {
   for (const locale of ["ru", "en", "de", "fr", "uk"]) {
     const help = helpMarkdown(locale);
-    assert.ok(help.includes("# Markdown Formatter"));
+    assert.ok(help.includes("# Markdown → Rich Message"));
     assert.ok(help.length > 300);
   }
 });
