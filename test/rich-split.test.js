@@ -47,3 +47,18 @@ test("media are attached only to the chunk that references them", () => {
   assert.deepEqual(parts[0].media.map((x) => x.id), ["media_1"]);
   assert.deepEqual(parts[1].media.map((x) => x.id), ["media_2"]);
 });
+
+
+test("many short H2 sections do not force excessive chunks", () => {
+  const sections = Array.from(
+    { length: 24 },
+    (_, i) => "## Section " + (i + 1) + "\n\n" + "x".repeat(1800)
+  );
+  const input = sections.join("\n\n");
+  const parts = splitRichMarkdown(input, 30000);
+
+  assert.ok(input.length > 40000);
+  assert.ok(input.length < 60000);
+  assert.ok(parts.length <= 3);
+  assert.ok(parts.every((part) => richLength(part) <= 30000));
+});
