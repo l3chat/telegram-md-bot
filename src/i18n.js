@@ -112,6 +112,10 @@ help: [
     statsConverted: "конверсий",
     shareText: "Markdown → Rich Message — бот для Markdown, длинных текстов и медиа в Telegram.",
     shareHint: "Перешлите эту ссылку другу — переход будет учтён в /stats.",
+    sendToChat: "📤 Отправить в другой чат",
+    inlineSendTitle: "Отправить этот Rich Message",
+    inlineSendDescription: "Нажмите, чтобы отправить его в выбранный чат.",
+    inlineExpired: "Подготовленное сообщение устарело. Создайте его в боте заново.",
     unexpectedError: "Произошла непредвиденная ошибка при создании Rich Message. Попробуйте ещё раз; если ошибка повторяется, используйте /help или GitHub."
   },
   en: {
@@ -201,6 +205,10 @@ help: [
     statsConverted: "converted",
     shareText: "Markdown → Rich Message turns Markdown, long text and media into Telegram Rich Messages.",
     shareHint: "Share this link with a friend — the referral will appear in /stats.",
+    sendToChat: "📤 Send to another chat",
+    inlineSendTitle: "Send this Rich Message",
+    inlineSendDescription: "Tap to send it to the selected chat.",
+    inlineExpired: "This prepared message has expired. Create it again in the bot.",
     unexpectedError: "An unexpected error occurred while building the Rich Message. Try again; if it repeats, use /help or GitHub."
   },
   de: {
@@ -290,6 +298,10 @@ help: [
     statsConverted: "konvertiert",
     shareText: "Markdown → Rich Message verwandelt Markdown, lange Texte und Medien in Telegram Rich Messages.",
     shareHint: "Teile diesen Link — die Herkunft erscheint in /stats.",
+    sendToChat: "📤 In anderen Chat senden",
+    inlineSendTitle: "Diese Rich Message senden",
+    inlineSendDescription: "Antippen, um sie in den gewählten Chat zu senden.",
+    inlineExpired: "Diese vorbereitete Nachricht ist abgelaufen. Erstelle sie im Bot erneut.",
     unexpectedError: "Beim Erstellen der Rich Message ist ein unerwarteter Fehler aufgetreten. Versuche es erneut; bei Wiederholung nutze /help oder GitHub."
   },
   fr: {
@@ -379,6 +391,10 @@ help: [
     statsConverted: "convertis",
     shareText: "Markdown → Rich Message transforme Markdown, textes longs et médias en Rich Messages Telegram.",
     shareHint: "Partagez ce lien — la provenance apparaîtra dans /stats.",
+    sendToChat: "📤 Envoyer dans un autre chat",
+    inlineSendTitle: "Envoyer ce Rich Message",
+    inlineSendDescription: "Touchez pour l’envoyer dans le chat choisi.",
+    inlineExpired: "Ce message préparé a expiré. Recréez-le dans le bot.",
     unexpectedError: "Une erreur inattendue s’est produite pendant la création du Rich Message. Réessayez ; si elle se répète, utilisez /help ou GitHub."
   },
   uk: {
@@ -468,6 +484,10 @@ help: [
     statsConverted: "конверсій",
     shareText: "Markdown → Rich Message — бот для Markdown, довгих текстів і медіа в Telegram.",
     shareHint: "Поділіться цим посиланням — джерело буде видно в /stats.",
+    sendToChat: "📤 Надіслати в інший чат",
+    inlineSendTitle: "Надіслати цей Rich Message",
+    inlineSendDescription: "Натисніть, щоб надіслати його у вибраний чат.",
+    inlineExpired: "Підготовлене повідомлення застаріло. Створіть його в боті знову.",
     unexpectedError: "Під час створення Rich Message сталася непередбачена помилка. Спробуйте ще раз; якщо вона повторюється, скористайтеся /help або GitHub."
   }
 };
