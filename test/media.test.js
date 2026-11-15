@@ -143,3 +143,33 @@ test("session assigns generated aliases atomically", () => {
   assert.equal(session.items[0].alias, "photo_1");
   assert.equal(session.items[1].alias, "photo_2");
 });
+
+
+test("image document keeps filename but embeds as photo", () => {
+  const item = detectIncomingMedia(
+    {
+      document: {
+        file_id: "document-image-id",
+        file_name: "261114selfi.jpg",
+        mime_type: "image/jpeg",
+      },
+      message_id: 42,
+    },
+    emptyMediaSession()
+  );
+
+  assert.equal(item.kind, "image_document");
+  assert.equal(item.alias, "261114selfi.jpg");
+
+  const session = addMediaToSession(emptyMediaSession(), item);
+  const prepared = prepareRichMarkdownMedia(
+    "![](261114selfi.jpg)\n\nHello.",
+    session
+  );
+
+  assert.deepEqual(prepared.missing, []);
+  assert.equal(prepared.media.length, 1);
+  assert.equal(prepared.media[0].media.type, "photo_from_document");
+  assert.equal(prepared.media[0].media.media, "document-image-id");
+  assert.ok(prepared.markdown.includes("tg://photo?id=media_1"));
+});
