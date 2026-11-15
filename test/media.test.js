@@ -173,3 +173,24 @@ test("image document keeps filename but embeds as photo", () => {
   assert.equal(prepared.media[0].media.media, "document-image-id");
   assert.ok(prepared.markdown.includes("tg://photo?id=media_1"));
 });
+
+
+test("multipart photo marker survives Rich Message preparation", () => {
+  const session = addMediaToSession(emptyMediaSession(), {
+    kind: "image_document",
+    file_id: "doc-photo-id",
+    file_name: "photo.jpg",
+    alias: "photo.jpg",
+    mime_type: "image/jpeg",
+  });
+
+  const prepared = prepareRichMarkdownMedia(
+    "![](photo.jpg)",
+    session
+  );
+
+  assert.equal(prepared.media[0].media.type, "photo_from_document");
+  assert.equal(prepared.media[0].media.source_file_name, "photo.jpg");
+  assert.equal(prepared.media[0].media.source_mime_type, "image/jpeg");
+  assert.ok(prepared.markdown.includes("tg://photo?id=media_1"));
+});
