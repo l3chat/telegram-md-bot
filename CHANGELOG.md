@@ -2,6 +2,10 @@
 
 ## 2026-11-08
 
+### Added
+- Added an inline “Send to another chat” flow for prepared Rich Messages. It avoids the large “Forwarded from” header and uses Telegram’s standard `via @tgMdFormatter_bot` attribution instead.
+- Added temporary 24-hour prepared-message storage in a dedicated Durable Object.
+
 ### Fixed
 - Preserved Telegram rich-text entities when users type formatted text directly in Telegram. Bold, italic, strikethrough, inline code and related formatting are converted back into Markdown before Rich Message generation.
 - Preserved formatting entities in media captions.
