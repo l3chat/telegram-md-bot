@@ -1,6 +1,8 @@
 import { prepareRichMarkdownMedia } from "./media.js";
 import { splitRichMessage } from "./rich-split.js";
 import { trackStat } from "./stats-store.js";
+import { savePreparedShare } from "./share-store.js";
+import { t } from "./i18n.js";
 
 const MAX_RICH_MESSAGE_PARTS = 10;
 
@@ -25,7 +27,10 @@ async function finalizeAlbumDraft(
   chatId,
   session,
   stats = null,
-  statsUserId = null
+  statsUserId = null,
+  shares = null,
+  env = null,
+  locale = "en"
 ) {
   const prepared = prepareRichMarkdownMedia(session.markdown, session, {
     appendUnreferenced: true,
@@ -44,7 +49,7 @@ async function finalizeAlbumDraft(
   }
 
   for (const part of parts) {
-    await telegramApiCall("sendRichMessage", token, {
+    const sent = await telegramApiCall("sendRichMessage", token, {
       chat_id: chatId,
       rich_message:
         part.media.length > 0
@@ -52,6 +57,57 @@ async function finalizeAlbumDraft(
           : { markdown: part.markdown },
     });
     await trackStat(stats, "rich_messages", statsUserId);
+
+    if (
+      shares &&
+      env &&
+      statsUserId != null &&
+      sent?.result?.message_id &&
+      !(part.media || []).some(
+        (item) => item?.media?.type === "photo_from_document"
+      )
+    ) {
+      try {
+        const shareToken = await savePreparedShare(
+          shares,
+          env,
+          statsUserId,
+          {
+            markdown: part.markdown,
+            ...(part.media.length > 0 ? { media: part.media } : {}),
+          },
+          {
+            title: t(locale, "inlineSendTitle"),
+            description: t(locale, "inlineSendDescription"),
+          }
+        );
+
+        if (shareToken) {
+          await telegramApiCall("editMessageReplyMarkup", token, {
+            chat_id: chatId,
+            message_id: sent.result.message_id,
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: t(locale, "sendToChat"),
+                    switch_inline_query_chosen_chat: {
+                      query: "share_" + shareToken,
+                      allow_user_chats: true,
+                      allow_bot_chats: false,
+                      allow_group_chats: true,
+                      allow_channel_chats: true,
+                    },
+                  },
+                ],
+              ],
+            },
+          });
+        }
+      } catch (error) {
+        console.error("Could not prepare album inline share", error);
+      }
+    }
   }
 }
 
