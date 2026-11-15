@@ -65,6 +65,7 @@ function detectIncomingMedia(message) {
     return {
       kind: "photo",
       file_id: photo.file_id,
+      file_unique_id: photo.file_unique_id || null,
       file_name: null,
       alias: null,
       mime_type: "image/jpeg",
@@ -77,6 +78,7 @@ function detectIncomingMedia(message) {
     return {
       kind: "audio",
       file_id: audio.file_id,
+      file_unique_id: audio.file_unique_id || null,
       file_name: audio.file_name || null,
       alias: sanitizeAlias(audio.file_name) || null,
       mime_type: audio.mime_type || "audio/mpeg",
@@ -89,6 +91,7 @@ function detectIncomingMedia(message) {
     return {
       kind: "voice",
       file_id: voice.file_id,
+      file_unique_id: voice.file_unique_id || null,
       file_name: null,
       alias: null,
       mime_type: voice.mime_type || "audio/ogg",
@@ -101,6 +104,7 @@ function detectIncomingMedia(message) {
     return {
       kind: "video",
       file_id: video.file_id,
+      file_unique_id: video.file_unique_id || null,
       file_name: video.file_name || null,
       alias: sanitizeAlias(video.file_name) || null,
       mime_type: video.mime_type || "video/mp4",
@@ -115,6 +119,7 @@ function detectIncomingMedia(message) {
     return {
       kind: imageAsFile ? "image_document" : "document",
       file_id: document.file_id,
+      file_unique_id: document.file_unique_id || null,
       file_name: document.file_name || null,
       alias: sanitizeAlias(document.file_name) || null,
       mime_type: mimeType,
@@ -134,12 +139,28 @@ function mediaPrefix(kind) {
   return "file";
 }
 
+function mediaIdentity(item) {
+  if (!item) return "";
+  if (item.file_unique_id) return "unique:" + String(item.file_unique_id);
+  if (item.file_id) return "file:" + String(item.file_id);
+  if (item.message_id != null) return "message:" + String(item.message_id);
+  return "";
+}
+
 function addMediaToSession(session, item) {
   const next = {
     ...emptyMediaSession(),
     ...session,
     items: Array.isArray(session?.items) ? [...session.items] : [],
   };
+
+  const identity = mediaIdentity(item);
+  if (
+    identity &&
+    next.items.some((existing) => mediaIdentity(existing) === identity)
+  ) {
+    return next;
+  }
 
   const preferred = sanitizeAlias(item.alias || item.file_name);
   const used = new Set(next.items.map((existing) => normalizeRef(existing.alias)));
@@ -251,6 +272,7 @@ function prepareRichMarkdownMedia(
   const media = [];
   const missing = [];
   const used = new Set();
+  const usedIdentities = new Set();
   const descriptorByItem = new Map();
   let counter = 0;
   let tooMany = false;
@@ -288,6 +310,8 @@ function prepareRichMarkdownMedia(
       const descriptor = ensureDescriptor(item);
       if (!descriptor) return full;
       used.add(item);
+      const identity = mediaIdentity(item);
+      if (identity) usedIdentities.add(identity);
 
       const safeTitle = title
         ? ' "' + String(title).replace(/"/g, "'") + '"'
@@ -310,10 +334,12 @@ function prepareRichMarkdownMedia(
   if (appendUnreferenced) {
     const blocks = [];
     for (const item of session?.items || []) {
-      if (used.has(item)) continue;
+      const identity = mediaIdentity(item);
+      if (used.has(item) || (identity && usedIdentities.has(identity))) continue;
       const descriptor = ensureDescriptor(item);
       if (!descriptor) continue;
       used.add(item);
+      if (identity) usedIdentities.add(identity);
       const caption = defaultCaption(item).replace(/"/g, "'");
       blocks.push(
         '![](tg://' +
@@ -391,6 +417,7 @@ export {
   isMarkdownLikeDocument,
   detectIncomingMedia,
   addMediaToSession,
+  mediaIdentity,
   setPendingMarkdown,
   touchSession,
   prepareRichMarkdownMedia,
