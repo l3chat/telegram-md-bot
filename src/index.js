@@ -245,34 +245,86 @@ async function downloadTelegramDocument(token, document) {
   return r.text();
 }
 
-async function resolveRichMediaForSend(token, media = []) {
-  const resolved = [];
+async function sendRichMessagePart(token, chatId, part) {
+  const special = (part.media || []).filter(
+    (item) => item?.media?.type === "photo_from_document"
+  );
 
-  for (const item of media || []) {
-    const input = item?.media;
-    if (input?.type !== "photo_from_document") {
-      resolved.push(item);
+  if (special.length === 0) {
+    return tgCall("sendRichMessage", token, {
+      chat_id: chatId,
+      rich_message:
+        part.media.length > 0
+          ? { markdown: part.markdown, media: part.media }
+          : { markdown: part.markdown },
+    });
+  }
+
+  const form = new FormData();
+  form.append("chat_id", String(chatId));
+
+  const richMedia = [];
+  let uploadIndex = 0;
+
+  for (const item of part.media) {
+    if (item?.media?.type !== "photo_from_document") {
+      richMedia.push(item);
       continue;
     }
 
     const fileInfo = await tgCall("getFile", token, {
-      file_id: input.media,
+      file_id: item.media.media,
     });
     const filePath = fileInfo.result?.file_path;
     if (!filePath) {
       throw new Error("Telegram did not return file_path for image document");
     }
 
-    resolved.push({
+    const fileResponse = await fetch(
+      "https://api.telegram.org/file/bot" + token + "/" + filePath
+    );
+    if (!fileResponse.ok) {
+      throw new Error(
+        "Image document download failed: HTTP " + fileResponse.status
+      );
+    }
+
+    const blob = await fileResponse.blob();
+    const field = "rm_photo_" + uploadIndex++;
+    const fileName =
+      item.media.source_file_name ||
+      ("image." +
+        (String(item.media.source_mime_type || "").includes("png")
+          ? "png"
+          : String(item.media.source_mime_type || "").includes("webp")
+            ? "webp"
+            : "jpg"));
+
+    form.append(field, blob, fileName);
+    richMedia.push({
       id: item.id,
       media: {
         type: "photo",
-        media: "https://api.telegram.org/file/bot" + token + "/" + filePath,
+        media: "attach://" + field,
       },
     });
   }
 
-  return resolved;
+  form.append(
+    "rich_message",
+    JSON.stringify({
+      markdown: part.markdown,
+      media: richMedia,
+    })
+  );
+
+  const response = await fetch(
+    "https://api.telegram.org/bot" + token + "/sendRichMessage",
+    { method: "POST", body: form }
+  );
+  const data = await response.json();
+  if (!data.ok) throw new TelegramApiError("sendRichMessage", data);
+  return data;
 }
 
 async function sendMarkdown(
@@ -285,8 +337,7 @@ async function sendMarkdown(
 ) {
   if (!markdown?.trim()) return;
 
-  const resolvedMedia = await resolveRichMediaForSend(token, media);
-  const parts = splitRichMessage(markdown, resolvedMedia);
+  const parts = splitRichMessage(markdown, media);
 
   if (parts.length > MAX_RICH_MESSAGE_PARTS) {
     throw new BotOperationError(
@@ -301,13 +352,7 @@ async function sendMarkdown(
 
   for (const part of parts) {
     try {
-      await tgCall("sendRichMessage", token, {
-        chat_id: chatId,
-        rich_message:
-          part.media.length > 0
-            ? { markdown: part.markdown, media: part.media }
-            : { markdown: part.markdown },
-      });
+      await sendRichMessagePart(token, chatId, part);
       await trackStat(stats, "rich_messages", statsUserId);
       continue;
     } catch (error) {
