@@ -424,3 +424,34 @@ Ready-to-publish launch copy and channel-specific templates: [PROMOTION.md](PROM
 - Telegram bot: https://t.me/tgMdFormatter_bot
 - Live tutorial: send `/test en` (or `ru/de/fr/uk`) to the bot
 - Visual demo source: https://github.com/l3chat/miniApps/tree/main/markdown-rich-message
+
+
+## Send to another chat
+
+For user-created Rich Messages, the bot adds a **📤 Send to another chat** button.
+
+The button uses Telegram inline mode:
+
+1. Tap **Send to another chat**.
+2. Choose a destination chat.
+3. Telegram opens an inline result containing the prepared Rich Message.
+4. Tap the result to send it.
+
+The destination message is not marked as **Forwarded from**. Telegram shows only the standard inline attribution `via @tgMdFormatter_bot`.
+
+Prepared share data expires automatically after 24 hours. The share token contains no message text or Telegram user ID.
+
+### Required BotFather setting
+
+Inline mode must be enabled once for the bot:
+
+1. Open **@BotFather**.
+2. Send `/setinline`.
+3. Choose **@tgMdFormatter_bot**.
+4. Set a placeholder, for example:
+
+```text
+Send a prepared Rich Message
+```
+
+This setting cannot be enabled through the Bot API itself.
