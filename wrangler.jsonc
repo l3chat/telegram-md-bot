@@ -18,6 +18,10 @@
       {
         "name": "STATS",
         "class_name": "StatsStore"
+      },
+      {
+        "name": "SHARES",
+        "class_name": "ShareStore"
       }
     ]
   },
@@ -64,6 +68,12 @@
       "tag": "v3",
       "new_sqlite_classes": [
         "StatsStore"
+      ]
+    },
+    {
+      "tag": "v4",
+      "new_sqlite_classes": [
+        "ShareStore"
       ]
     }
   ]
