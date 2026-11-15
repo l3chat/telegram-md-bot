@@ -110,12 +110,14 @@ function detectIncomingMedia(message) {
 
   if (message?.document && !isMarkdownLikeDocument(message.document)) {
     const document = message.document;
+    const mimeType = document.mime_type || "application/octet-stream";
+    const imageAsFile = /^image\/(jpeg|png|webp)$/i.test(mimeType);
     return {
-      kind: "document",
+      kind: imageAsFile ? "image_document" : "document",
       file_id: document.file_id,
       file_name: document.file_name || null,
       alias: sanitizeAlias(document.file_name) || null,
-      mime_type: document.mime_type || "application/octet-stream",
+      mime_type: mimeType,
       message_id: message.message_id,
     };
   }
@@ -128,6 +130,7 @@ function mediaPrefix(kind) {
   if (kind === "voice") return "voice";
   if (kind === "audio") return "audio";
   if (kind === "video") return "video";
+  if (kind === "image_document") return "photo";
   return "file";
 }
 
@@ -199,7 +202,7 @@ function isRemoteMediaRef(ref) {
 
 function mediaDescriptor(item, id) {
   const scheme =
-    item.kind === "photo"
+    item.kind === "photo" || item.kind === "image_document"
       ? "photo"
       : item.kind === "video"
         ? "video"
@@ -207,7 +210,12 @@ function mediaDescriptor(item, id) {
           ? "document"
           : "audio";
 
-  const mediaType = item.kind === "voice" ? "voice_note" : item.kind;
+  const mediaType =
+    item.kind === "voice"
+      ? "voice_note"
+      : item.kind === "image_document"
+        ? "photo_from_document"
+        : item.kind;
 
   return {
     id,
@@ -217,6 +225,9 @@ function mediaDescriptor(item, id) {
       media: {
         type: mediaType,
         media: item.file_id,
+        ...(item.kind === "image_document"
+          ? { source_mime_type: item.mime_type, source_file_name: item.file_name }
+          : {}),
       },
     },
   };
@@ -224,7 +235,7 @@ function mediaDescriptor(item, id) {
 
 function defaultCaption(item) {
   if (item.file_name) return item.file_name;
-  if (item.kind === "photo") return "Фото";
+  if (item.kind === "photo" || item.kind === "image_document") return "Фото";
   if (item.kind === "voice") return "Голосовая запись";
   if (item.kind === "audio") return "Аудио";
   if (item.kind === "video") return "Видео";
@@ -352,7 +363,7 @@ function mediaListText(session, locale = "en") {
 
   const lines = items.map((item, index) => {
     const marker =
-      item.kind === "photo"
+      item.kind === "photo" || item.kind === "image_document"
         ? "🖼"
         : item.kind === "voice"
           ? "🎙"
