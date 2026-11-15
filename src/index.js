@@ -60,6 +60,11 @@ import {
   BOT_USERNAME,
   landingHtml,
 } from "./landing.js";
+import {
+  ShareStore,
+  savePreparedShare,
+  getPreparedShare,
+} from "./share-store.js";
 
 const BOT_BUILD_VERSION = "worker-v1";
 const MAX_TEXT_FILE_BYTES = 20 * 1024 * 1024;
@@ -327,13 +332,116 @@ async function sendRichMessagePart(token, chatId, part) {
   return data;
 }
 
+function collectSentRichMedia(value, out = []) {
+  if (!value || typeof value !== "object") return out;
+
+  if (value.type === "photo" && Array.isArray(value.photo)) {
+    const size = value.photo[value.photo.length - 1];
+    if (size?.file_id) out.push({ type: "photo", file_id: size.file_id });
+    return out;
+  }
+
+  const direct = [
+    ["video", "video"],
+    ["audio", "audio"],
+    ["document", "document"],
+    ["voice_note", "voice_note"],
+    ["animation", "animation"],
+  ];
+
+  for (const [type, field] of direct) {
+    if (value.type === type && value[field]?.file_id) {
+      out.push({ type, file_id: value[field].file_id });
+      return out;
+    }
+  }
+
+  for (const child of Object.values(value)) {
+    if (Array.isArray(child)) {
+      for (const item of child) collectSentRichMedia(item, out);
+    } else if (child && typeof child === "object") {
+      collectSentRichMedia(child, out);
+    }
+  }
+
+  return out;
+}
+
+function inlineMediaFromSent(part, sentMessage) {
+  const sent = collectSentRichMedia(sentMessage?.rich_message?.blocks || []);
+  let cursor = 0;
+
+  return (part.media || []).map((item) => {
+    const rawType = item?.media?.type;
+    const expected =
+      rawType === "photo_from_document"
+        ? "photo"
+        : rawType === "voice_note"
+          ? "voice_note"
+          : rawType;
+
+    let found = -1;
+    for (let i = cursor; i < sent.length; i += 1) {
+      if (sent[i].type === expected) {
+        found = i;
+        break;
+      }
+    }
+
+    if (found >= 0) {
+      cursor = found + 1;
+      return {
+        id: item.id,
+        media: {
+          type: expected,
+          media: sent[found].file_id,
+        },
+      };
+    }
+
+    if (
+      rawType !== "photo_from_document" &&
+      typeof item?.media?.media === "string" &&
+      !item.media.media.startsWith("attach://")
+    ) {
+      return item;
+    }
+
+    throw new Error("Could not prepare reusable inline media");
+  });
+}
+
+async function attachShareButton(token, chatId, messageId, locale, botToken) {
+  await tgCall("editMessageReplyMarkup", botToken, {
+    chat_id: chatId,
+    message_id: messageId,
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: t(locale, "sendToChat"),
+            switch_inline_query_chosen_chat: {
+              query: "share_" + token,
+              allow_user_chats: true,
+              allow_bot_chats: false,
+              allow_group_chats: true,
+              allow_channel_chats: true,
+            },
+          },
+        ],
+      ],
+    },
+  });
+}
+
 async function sendMarkdown(
   chatId,
   markdown,
   token,
   media = [],
   stats = null,
-  statsUserId = null
+  statsUserId = null,
+  share = null
 ) {
   if (!markdown?.trim()) return;
 
@@ -352,8 +460,48 @@ async function sendMarkdown(
 
   for (const part of parts) {
     try {
-      await sendRichMessagePart(token, chatId, part);
+      const sent = await sendRichMessagePart(token, chatId, part);
       await trackStat(stats, "rich_messages", statsUserId);
+
+      if (
+        share?.namespace &&
+        share?.env &&
+        statsUserId != null &&
+        sent?.result?.message_id
+      ) {
+        try {
+          const inlineMedia = inlineMediaFromSent(part, sent.result);
+          const richMessage = {
+            markdown: part.markdown,
+            ...(inlineMedia.length > 0 ? { media: inlineMedia } : {}),
+          };
+          const shareToken = await savePreparedShare(
+            share.namespace,
+            share.env,
+            statsUserId,
+            richMessage,
+            {
+              title: t(share.locale || "en", "inlineSendTitle"),
+              description: t(
+                share.locale || "en",
+                "inlineSendDescription"
+              ),
+            }
+          );
+          if (shareToken) {
+            await attachShareButton(
+              shareToken,
+              chatId,
+              sent.result.message_id,
+              share.locale || "en",
+              token
+            );
+          }
+        } catch (shareError) {
+          console.warn("Could not prepare inline share", shareError);
+        }
+      }
+
       continue;
     } catch (error) {
       if (part.media.length > 0) throw error;
@@ -386,7 +534,8 @@ async function sendPreparedDraft(
   markdown,
   locale,
   stats = null,
-  statsUserId = null
+  statsUserId = null,
+  share = null
 ) {
   const prepared = prepareRichMarkdownMedia(markdown, session, {
     appendUnreferenced: true,
@@ -419,7 +568,8 @@ async function sendPreparedDraft(
     token,
     prepared.media,
     stats,
-    statsUserId
+    statsUserId,
+    share
   );
   await clearDraftSession(stub);
   return true;
@@ -491,6 +641,73 @@ export default {
     }
 
     const update = await request.json();
+
+    const inlineQuery = update.inline_query;
+    if (inlineQuery) {
+      const match = String(inlineQuery.query || "")
+        .trim()
+        .match(/^share_([a-f0-9]{24})$/i);
+      const inlineLocale = localeFromMessage({ from: inlineQuery.from });
+
+      if (!match) {
+        await tgCall("answerInlineQuery", env.BOT_TOKEN, {
+          inline_query_id: inlineQuery.id,
+          results: [],
+          cache_time: 1,
+          is_personal: true,
+        });
+        return new Response("OK");
+      }
+
+      const prepared = await getPreparedShare(
+        env.SHARES,
+        env,
+        match[1],
+        inlineQuery.from?.id
+      );
+
+      if (!prepared) {
+        await tgCall("answerInlineQuery", env.BOT_TOKEN, {
+          inline_query_id: inlineQuery.id,
+          results: [
+            {
+              type: "article",
+              id: "expired_" + match[1],
+              title: t(inlineLocale, "inlineSendTitle"),
+              description: t(inlineLocale, "inlineExpired"),
+              input_message_content: {
+                message_text: t(inlineLocale, "inlineExpired"),
+              },
+            },
+          ],
+          cache_time: 1,
+          is_personal: true,
+        });
+        return new Response("OK");
+      }
+
+      await tgCall("answerInlineQuery", env.BOT_TOKEN, {
+        inline_query_id: inlineQuery.id,
+        results: [
+          {
+            type: "article",
+            id: "share_" + match[1],
+            title:
+              prepared.title || t(inlineLocale, "inlineSendTitle"),
+            description:
+              prepared.description ||
+              t(inlineLocale, "inlineSendDescription"),
+            input_message_content: {
+              rich_message: prepared.rich_message,
+            },
+          },
+        ],
+        cache_time: 1,
+        is_personal: true,
+      });
+      return new Response("OK");
+    }
+
     const message = update.message;
     const chatId = message?.chat?.id;
     if (!message || !chatId) return new Response("OK");
@@ -741,7 +958,8 @@ export default {
           session.markdown,
           locale,
           env.STATS,
-          userId
+          userId,
+          { namespace: env.SHARES, env, locale }
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -869,7 +1087,8 @@ export default {
           markdown,
           locale,
           env.STATS,
-          userId
+          userId,
+          { namespace: env.SHARES, env, locale }
         );
       } catch (error) {
         await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -884,7 +1103,8 @@ export default {
         env.BOT_TOKEN,
         [],
         env.STATS,
-        userId
+        userId,
+        { namespace: env.SHARES, env, locale }
       );
     } catch (error) {
       await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
@@ -897,6 +1117,7 @@ export {
   DraftSession,
   TestFixtureStore,
   StatsStore,
+  ShareStore,
   markdownToEntities,
   splitTelegramWithEntities,
   isCommand,
