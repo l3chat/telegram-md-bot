@@ -1017,7 +1017,8 @@ export default {
             message.caption,
             locale,
             env.STATS,
-            userId
+            userId,
+            { namespace: env.SHARES, env, locale }
           );
         } catch (error) {
           await sendLocalizedError(chatId, env.BOT_TOKEN, locale, error, env.STATS);
