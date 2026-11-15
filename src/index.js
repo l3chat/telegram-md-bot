@@ -245,6 +245,36 @@ async function downloadTelegramDocument(token, document) {
   return r.text();
 }
 
+async function resolveRichMediaForSend(token, media = []) {
+  const resolved = [];
+
+  for (const item of media || []) {
+    const input = item?.media;
+    if (input?.type !== "photo_from_document") {
+      resolved.push(item);
+      continue;
+    }
+
+    const fileInfo = await tgCall("getFile", token, {
+      file_id: input.media,
+    });
+    const filePath = fileInfo.result?.file_path;
+    if (!filePath) {
+      throw new Error("Telegram did not return file_path for image document");
+    }
+
+    resolved.push({
+      id: item.id,
+      media: {
+        type: "photo",
+        media: "https://api.telegram.org/file/bot" + token + "/" + filePath,
+      },
+    });
+  }
+
+  return resolved;
+}
+
 async function sendMarkdown(
   chatId,
   markdown,
@@ -255,7 +285,8 @@ async function sendMarkdown(
 ) {
   if (!markdown?.trim()) return;
 
-  const parts = splitRichMessage(markdown, media);
+  const resolvedMedia = await resolveRichMediaForSend(token, media);
+  const parts = splitRichMessage(markdown, resolvedMedia);
 
   if (parts.length > MAX_RICH_MESSAGE_PARTS) {
     throw new BotOperationError(
