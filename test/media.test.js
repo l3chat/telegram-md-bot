@@ -194,3 +194,70 @@ test("multipart photo marker survives Rich Message preparation", () => {
   assert.equal(prepared.media[0].media.source_mime_type, "image/jpeg");
   assert.ok(prepared.markdown.includes("tg://photo?id=media_1"));
 });
+
+
+test("duplicate media file is not appended twice", () => {
+  let session = emptyMediaSession();
+
+  const item = {
+    kind: "image_document",
+    file_id: "same-file-id",
+    file_unique_id: "same-unique-id",
+    file_name: "261114selfi.jpg",
+    alias: "261114selfi.jpg",
+    mime_type: "image/jpeg",
+  };
+
+  session = addMediaToSession(session, item);
+  session = addMediaToSession(session, { ...item, message_id: 999 });
+
+  assert.equal(session.items.length, 1);
+
+  const prepared = prepareRichMarkdownMedia(
+    "![](261114selfi.jpg)\n\nHello.",
+    session,
+    { appendUnreferenced: true }
+  );
+
+  assert.equal(prepared.media.length, 1);
+  assert.equal(
+    (prepared.markdown.match(/tg:\/\/photo\?id=/g) || []).length,
+    1
+  );
+});
+
+test("equivalent duplicate already in old draft is not appended after reference", () => {
+  const session = {
+    ...emptyMediaSession(),
+    items: [
+      {
+        kind: "image_document",
+        file_id: "old-a",
+        file_unique_id: "same-unique-id",
+        file_name: "261114selfi.jpg",
+        alias: "261114selfi.jpg",
+        mime_type: "image/jpeg",
+      },
+      {
+        kind: "image_document",
+        file_id: "old-b",
+        file_unique_id: "same-unique-id",
+        file_name: "261114selfi.jpg",
+        alias: "261114selfi.jpg",
+        mime_type: "image/jpeg",
+      },
+    ],
+  };
+
+  const prepared = prepareRichMarkdownMedia(
+    "![](261114selfi.jpg)\n\nHello.",
+    session,
+    { appendUnreferenced: true }
+  );
+
+  assert.equal(prepared.media.length, 1);
+  assert.equal(
+    (prepared.markdown.match(/tg:\/\/photo\?id=/g) || []).length,
+    1
+  );
+});
